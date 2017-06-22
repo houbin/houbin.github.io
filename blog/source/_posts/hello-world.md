@@ -3,7 +3,21 @@ date: 2016-01-23 10:39:33
 ---
 Welcome to [Hexo](http://hexo.io/)! This is your very first post. Check [documentation](http://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](http://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 
+### Installation
+
+``` bash
+$ npm install hexo-cli -g
+```
+
 ## Quick Start
+
+### Setup your blog
+
+```bash
+$ hexo init blog
+$ cd blog
+$ npm install hexo --save
+```
 
 ### Create a new post
 
