@@ -1,23 +1,33 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var fs = require('hexo-fs');
 
-describe('clean', () => {
+describe('clean', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname, {silent: true});
   var clean = require('../../../lib/plugins/console/clean').bind(hexo);
 
-  it('delete database', () => {
+  it('delete database', function() {
     var dbPath = hexo.database.options.path;
 
-    return fs.writeFile(dbPath, '').then(() => clean()).then(() => fs.exists(dbPath)).then(exist => {
+    return fs.writeFile(dbPath, '').then(function() {
+      return clean();
+    }).then(function() {
+      return fs.exists(dbPath);
+    }).then(function(exist) {
       exist.should.be.false;
     });
   });
 
-  it('delete public folder', () => {
+  it('delete public folder', function() {
     var publicDir = hexo.public_dir;
 
-    return fs.mkdirs(publicDir).then(() => clean()).then(() => fs.exists(publicDir)).then(exist => {
+    return fs.mkdirs(publicDir).then(function() {
+      return clean();
+    }).then(function() {
+      return fs.exists(publicDir);
+    }).then(function(exist) {
       exist.should.be.false;
     });
   });

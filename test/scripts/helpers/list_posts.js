@@ -1,6 +1,8 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('list_posts', () => {
+describe('list_posts', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
   var Post = hexo.model('Post');
@@ -15,16 +17,20 @@ describe('list_posts', () => {
 
   hexo.config.permalink = ':title/';
 
-  before(() => hexo.init().then(() => Post.insert([
-    {source: 'foo', slug: 'foo', title: 'Its', date: 1e8},
-    {source: 'bar', slug: 'bar', title: 'Chemistry', date: 1e8 + 1},
-    {source: 'baz', slug: 'baz', title: 'Bitch', date: 1e8 - 1}
-  ])).then(() => {
-    hexo.locals.invalidate();
-    ctx.site = hexo.locals.toObject();
-  }));
+  before(function() {
+    return hexo.init().then(function() {
+      return Post.insert([
+        {source: 'foo', slug: 'foo', title: 'Its', date: 1e8},
+        {source: 'bar', slug: 'bar', title: 'Chemistry', date: 1e8 + 1},
+        {source: 'baz', slug: 'baz', title: 'Bitch', date: 1e8 - 1}
+      ]);
+    }).then(function() {
+      hexo.locals.invalidate();
+      ctx.site = hexo.locals.toObject();
+    });
+  });
 
-  it('default', () => {
+  it('default', function() {
     var result = listPosts();
 
     result.should.eql([
@@ -36,7 +42,7 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('specified collection', () => {
+  it('specified collection', function() {
     var result = listPosts(Post.find({
       title: 'Its'
     }));
@@ -48,7 +54,7 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('style: false', () => {
+  it('style: false', function() {
     var result = listPosts({
       style: false
     });
@@ -60,7 +66,7 @@ describe('list_posts', () => {
     ].join(', '));
   });
 
-  it('orderby', () => {
+  it('orderby', function() {
     var result = listPosts({
       orderby: 'title'
     });
@@ -74,7 +80,7 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('order', () => {
+  it('order', function() {
     var result = listPosts({
       order: 1
     });
@@ -88,7 +94,7 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('class', () => {
+  it('class', function() {
     var result = listPosts({
       class: 'test'
     });
@@ -102,9 +108,9 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('transform', () => {
+  it('transform', function() {
     var result = listPosts({
-      transform(str) {
+      transform: function(str) {
         return str.toUpperCase();
       }
     });
@@ -118,7 +124,7 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('separator', () => {
+  it('separator', function() {
     var result = listPosts({
       style: false,
       separator: ''
@@ -131,7 +137,7 @@ describe('list_posts', () => {
     ].join(''));
   });
 
-  it('amount', () => {
+  it('amount', function() {
     var result = listPosts({
       amount: 2
     });

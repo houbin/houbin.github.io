@@ -1,7 +1,9 @@
+'use strict';
+
 var crypto = require('crypto');
 var should = require('chai').should(); // eslint-disable-line
 
-describe('gravatar', () => {
+describe('gravatar', function() {
   var gravatar = require('../../../lib/plugins/helper/gravatar');
 
   function md5(str) {
@@ -11,15 +13,15 @@ describe('gravatar', () => {
   var email = 'abc@abc.com';
   var hash = md5(email);
 
-  it('default', () => {
+  it('default', function() {
     gravatar(email).should.eql('https://www.gravatar.com/avatar/' + hash);
   });
 
-  it('size', () => {
+  it('size', function() {
     gravatar(email, 100).should.eql('https://www.gravatar.com/avatar/' + hash + '?s=100');
   });
 
-  it('options', () => {
+  it('options', function() {
     gravatar(email, {
       s: 200,
       r: 'pg',

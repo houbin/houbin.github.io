@@ -1,3 +1,5 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var _ = require('lodash');
 
@@ -5,7 +7,7 @@ function ifTrue(cond, yes, no) {
   return cond ? yes : no;
 }
 
-describe('toc', () => {
+describe('toc', function() {
   var toc = require('../../../lib/plugins/helper/toc');
 
   var html = [
@@ -19,7 +21,7 @@ describe('toc', () => {
     '<h2 id="title_2_1">Title 2.1</h2>'
   ].join('');
 
-  var genResult = options => {
+  var genResult = function(options) {
     options = _.assign({
       class: 'toc',
       list_number: true,
@@ -114,11 +116,11 @@ describe('toc', () => {
     return result;
   };
 
-  it('default', () => {
+  it('default', function() {
     genResult().should.eql(toc(html));
   });
 
-  it('class', () => {
+  it('class', function() {
     var options = {
       class: 'foo'
     };
@@ -126,7 +128,7 @@ describe('toc', () => {
     genResult(options).should.eql(toc(html, options));
   });
 
-  it('list_number', () => {
+  it('list_number', function() {
     var options = {
       list_number: false
     };
@@ -134,7 +136,7 @@ describe('toc', () => {
     genResult(options).should.eql(toc(html, options));
   });
 
-  it('max_depth', () => {
+  it('max_depth', function() {
     var options = {
       max_depth: 2
     };

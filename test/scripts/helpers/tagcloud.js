@@ -1,7 +1,9 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var Promise = require('bluebird');
 
-describe('tagcloud', () => {
+describe('tagcloud', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
   var Post = hexo.model('Post');
@@ -15,23 +17,31 @@ describe('tagcloud', () => {
 
   var tagcloud = require('../../../lib/plugins/helper/tagcloud').bind(ctx);
 
-  before(() => hexo.init().then(() => Post.insert([
-    {source: 'foo', slug: 'foo'},
-    {source: 'bar', slug: 'bar'},
-    {source: 'baz', slug: 'baz'},
-    {source: 'boo', slug: 'boo'}
-  ])).then(posts => // TODO: Warehouse needs to add a mutex lock when writing data to avoid data sync problem
-  Promise.each([
-    ['bcd'],
-    ['bcd', 'cde'],
-    ['bcd', 'cde', 'abc'],
-    ['bcd', 'cde', 'abc', 'def']
-  ], (tags, i) => posts[i].setTags(tags))).then(() => {
-    hexo.locals.invalidate();
-    ctx.site = hexo.locals.toObject();
-  }));
+  before(function() {
+    return hexo.init().then(function() {
+      return Post.insert([
+        {source: 'foo', slug: 'foo'},
+        {source: 'bar', slug: 'bar'},
+        {source: 'baz', slug: 'baz'},
+        {source: 'boo', slug: 'boo'}
+      ]);
+    }).then(function(posts) {
+      // TODO: Warehouse needs to add a mutex lock when writing data to avoid data sync problem
+      return Promise.each([
+        ['bcd'],
+        ['bcd', 'cde'],
+        ['bcd', 'cde', 'abc'],
+        ['bcd', 'cde', 'abc', 'def']
+      ], function(tags, i) {
+        return posts[i].setTags(tags);
+      });
+    }).then(function() {
+      hexo.locals.invalidate();
+      ctx.site = hexo.locals.toObject();
+    });
+  });
 
-  it('default', () => {
+  it('default', function() {
     var result = tagcloud();
 
     result.should.eql([
@@ -42,7 +52,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('specified collection', () => {
+  it('specified collection', function() {
     var result = tagcloud(Tag.find({
       name: /bc/
     }));
@@ -53,7 +63,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('font size', () => {
+  it('font size', function() {
     var result = tagcloud({
       min_font: 15,
       max_font: 30
@@ -67,7 +77,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('font size - when every tag has the same number of posts, font-size should be minimum.', () => {
+  it('font size - when every tag has the same number of posts, font-size should be minimum.', function() {
     var result = tagcloud(Tag.find({
       name: /abc/
     }), {
@@ -80,7 +90,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('font unit', () => {
+  it('font unit', function() {
     var result = tagcloud({
       unit: 'em'
     });
@@ -93,7 +103,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('orderby', () => {
+  it('orderby', function() {
     var result = tagcloud({
       orderby: 'length'
     });
@@ -106,7 +116,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('order', () => {
+  it('order', function() {
     var result = tagcloud({
       order: -1
     });
@@ -119,7 +129,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('amount', () => {
+  it('amount', function() {
     var result = tagcloud({
       amount: 2
     });
@@ -130,9 +140,9 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('transform', () => {
+  it('transform', function() {
     var result = tagcloud({
-      transform(name) {
+      transform: function(name) {
         return name.toUpperCase();
       }
     });
@@ -145,7 +155,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('color: name', () => {
+  it('color: name', function() {
     var result = tagcloud({
       color: true,
       start_color: 'red',
@@ -160,7 +170,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('color: hex', () => {
+  it('color: hex', function() {
     var result = tagcloud({
       color: true,
       start_color: '#f00', // red
@@ -175,7 +185,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('color: RGBA', () => {
+  it('color: RGBA', function() {
     var result = tagcloud({
       color: true,
       start_color: 'rgba(70, 130, 180, 0.3)', // steelblue
@@ -190,7 +200,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('color: HSLA', () => {
+  it('color: HSLA', function() {
     var result = tagcloud({
       color: true,
       start_color: 'hsla(207, 44%, 49%, 0.3)', // rgba(70, 130, 180, 0.3)
@@ -205,7 +215,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('color - when every tag has the same number of posts, start_color should be used.', () => {
+  it('color - when every tag has the same number of posts, start_color should be used.', function() {
     var result = tagcloud(Tag.find({
       name: /abc/
     }), {
@@ -219,7 +229,7 @@ describe('tagcloud', () => {
     ].join(' '));
   });
 
-  it('separator', () => {
+  it('separator', function() {
     var result = tagcloud({
       separator: ', '
     });

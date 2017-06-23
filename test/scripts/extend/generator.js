@@ -1,18 +1,20 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('Generator', () => {
+describe('Generator', function() {
   var Generator = require('../../../lib/extend/generator');
 
-  it('register()', () => {
+  it('register()', function() {
     var g = new Generator();
 
     // name, fn
-    g.register('test', () => {});
+    g.register('test', function() {});
 
     g.get('test').should.exist;
 
     // fn
-    g.register(() => {});
+    g.register(function() {});
 
     g.get('generator-0').should.exist;
 
@@ -26,30 +28,30 @@ describe('Generator', () => {
     }
   });
 
-  it('register() - promisify', () => {
+  it('register() - promisify', function() {
     var g = new Generator();
 
-    g.register('test', (locals, render, callback) => {
+    g.register('test', function(locals, render, callback) {
       callback(null, 'foo');
     });
 
-    g.get('test')({}, {}).then(result => {
+    g.get('test')({}, {}).then(function(result) {
       result.should.eql('foo');
     });
   });
 
-  it('get()', () => {
+  it('get()', function() {
     var g = new Generator();
 
-    g.register('test', () => {});
+    g.register('test', function() {});
 
     g.get('test').should.exist;
   });
 
-  it('list()', () => {
+  it('list()', function() {
     var g = new Generator();
 
-    g.register('test', () => {});
+    g.register('test', function() {});
 
     g.list().should.have.keys(['test']);
   });

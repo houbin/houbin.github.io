@@ -1,12 +1,14 @@
+'use strict';
+
 var Promise = require('bluebird');
 
 function readStream(stream) {
-  return new Promise((resolve, reject) => {
+  return new Promise(function(resolve, reject) {
     var data = '';
 
-    stream.on('data', chunk => {
+    stream.on('data', function(chunk) {
       data += chunk.toString();
-    }).on('end', () => {
+    }).on('end', function() {
       resolve(data);
     }).on('error', reject);
   });

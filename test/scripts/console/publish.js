@@ -1,3 +1,5 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var fs = require('hexo-fs');
 var moment = require('moment');
@@ -5,7 +7,7 @@ var pathFn = require('path');
 var Promise = require('bluebird');
 var sinon = require('sinon');
 
-describe('publish', () => {
+describe('publish', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(pathFn.join(__dirname, 'publish_test'), {silent: true});
   var publish = require('../../../lib/plugins/console/publish').bind(hexo);
@@ -13,40 +15,45 @@ describe('publish', () => {
   var now = Date.now();
   var clock;
 
-  before(() => {
+  before(function() {
     clock = sinon.useFakeTimers(now);
 
-    return fs.mkdirs(hexo.base_dir).then(() => hexo.init()).then(() => hexo.scaffold.set('post', [
-      '---',
-      'title: {{ title }}',
-      'date: {{ date }}',
-      'tags:',
-      '---'
-    ].join('\n'))).then(() => hexo.scaffold.set('draft', [
-      '---',
-      'title: {{ title }}',
-      'tags:',
-      '---'
-    ].join('\n')));
+    return fs.mkdirs(hexo.base_dir).then(function() {
+      return hexo.init();
+    }).then(function() {
+      return hexo.scaffold.set('post', [
+        'title: {{ title }}',
+        'date: {{ date }}',
+        'tags:',
+        '---'
+      ].join('\n'));
+    }).then(function() {
+      return hexo.scaffold.set('draft', [
+        'title: {{ title }}',
+        'tags:',
+        '---'
+      ].join('\n'));
+    });
   });
 
-  after(() => {
+  after(function() {
     clock.restore();
     return fs.rmdir(hexo.base_dir);
   });
 
-  beforeEach(() => post.create({
-    title: 'Hello World',
-    layout: 'draft'
-  }));
+  beforeEach(function() {
+    return post.create({
+      title: 'Hello World',
+      layout: 'draft'
+    });
+  });
 
-  it('slug', () => {
+  it('slug', function() {
     var draftPath = pathFn.join(hexo.source_dir, '_drafts', 'Hello-World.md');
     var path = pathFn.join(hexo.source_dir, '_posts', 'Hello-World.md');
     var date = moment(now);
 
     var content = [
-        '---',
       'title: Hello World',
       'date: ' + date.format('YYYY-MM-DD HH:mm:ss'),
       'tags:',
@@ -55,10 +62,12 @@ describe('publish', () => {
 
     return publish({
       _: ['Hello-World']
-    }).then(() => Promise.all([
-      fs.exists(draftPath),
-      fs.readFile(path)
-    ])).spread((exist, data) => {
+    }).then(function() {
+      return Promise.all([
+        fs.exists(draftPath),
+        fs.readFile(path)
+      ]);
+    }).spread(function(exist, data) {
       exist.should.be.false;
       data.should.eql(content);
 
@@ -66,12 +75,11 @@ describe('publish', () => {
     });
   });
 
-  it('layout', () => {
+  it('layout', function() {
     var path = pathFn.join(hexo.source_dir, '_posts', 'Hello-World.md');
     var date = moment(now);
 
     var content = [
-        '---',
       'layout: photo',
       'title: Hello World',
       'date: ' + date.format('YYYY-MM-DD HH:mm:ss'),
@@ -81,20 +89,26 @@ describe('publish', () => {
 
     return publish({
       _: ['photo', 'Hello-World']
-    }).then(() => fs.readFile(path)).then(data => {
+    }).then(function() {
+      return fs.readFile(path);
+    }).then(function(data) {
       data.should.eql(content);
       return fs.unlink(path);
     });
   });
 
-  it('rename if target existed', () => {
+  it('rename if target existed', function() {
     var path = pathFn.join(hexo.source_dir, '_posts', 'Hello-World-1.md');
 
     return post.create({
       title: 'Hello World'
-    }).then(() => publish({
-      _: ['Hello-World']
-    })).then(() => fs.exists(path)).then(exist => {
+    }).then(function() {
+      return publish({
+        _: ['Hello-World']
+      });
+    }).then(function() {
+      return fs.exists(path);
+    }).then(function(exist) {
       exist.should.be.true;
 
       return Promise.all([
@@ -104,15 +118,19 @@ describe('publish', () => {
     });
   });
 
-  it('replace existing target', () => {
+  it('replace existing target', function() {
     var path = pathFn.join(hexo.source_dir, '_posts', 'Hello-World.md');
 
     return post.create({
       title: 'Hello World'
-    }).then(() => publish({
-      _: ['Hello-World'],
-      replace: true
-    })).then(() => fs.exists(pathFn.join(hexo.source_dir, '_posts', 'Hello-World-1.md'))).then(exist => {
+    }).then(function() {
+      return publish({
+        _: ['Hello-World'],
+        replace: true
+      });
+    }).then(function() {
+      return fs.exists(pathFn.join(hexo.source_dir, '_posts', 'Hello-World-1.md'));
+    }).then(function(exist) {
       exist.should.be.false;
 
       return fs.unlink(path);

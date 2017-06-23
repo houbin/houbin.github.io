@@ -1,6 +1,8 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('css', () => {
+describe('css', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
 
@@ -22,26 +24,26 @@ describe('css', () => {
     result.should.eql(expected.trim());
   }
 
-  it('a string', () => {
+  it('a string', function() {
     assertResult(css('style'), '/style.css');
     assertResult(css('style.css'), '/style.css');
     assertResult(css('http://hexo.io/style.css'), 'http://hexo.io/style.css');
     assertResult(css('//hexo.io/style.css'), '//hexo.io/style.css');
   });
 
-  it('an array', () => {
+  it('an array', function() {
     assertResult(css(['foo', 'bar', 'baz']), '/foo.css', '/bar.css', '/baz.css');
   });
 
-  it('multiple strings', () => {
+  it('multiple strings', function() {
     assertResult(css('foo', 'bar', 'baz'), '/foo.css', '/bar.css', '/baz.css');
   });
 
-  it('multiple arrays', () => {
+  it('multiple arrays', function() {
     assertResult(css(['foo', 'bar'], ['baz']), '/foo.css', '/bar.css', '/baz.css');
   });
 
-  it('mixed', () => {
+  it('mixed', function() {
     assertResult(css(['foo', 'bar'], 'baz'), '/foo.css', '/bar.css', '/baz.css');
   });
 });

@@ -1,10 +1,12 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var sinon = require('sinon');
 var pathFn = require('path');
 var fs = require('hexo-fs');
 var Promise = require('bluebird');
 
-describe('config', () => {
+describe('config', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(pathFn.join(__dirname, 'config_test'), {silent: true});
   var processor = require('../../../lib/theme/processors/config');
@@ -16,14 +18,20 @@ describe('config', () => {
     return new hexo.theme.File(options);
   }
 
-  before(() => Promise.all([
-    fs.mkdirs(themeDir),
-    fs.writeFile(hexo.config_path, 'theme: test')
-  ]).then(() => hexo.init()));
+  before(function() {
+    return Promise.all([
+      fs.mkdirs(themeDir),
+      fs.writeFile(hexo.config_path, 'theme: test')
+    ]).then(function() {
+      return hexo.init();
+    });
+  });
 
-  after(() => fs.rmdir(hexo.base_dir));
+  after(function() {
+    return fs.rmdir(hexo.base_dir);
+  });
 
-  it('pattern', () => {
+  it('pattern', function() {
     var pattern = processor.pattern;
 
     pattern.match('_config.yml').should.be.ok;
@@ -32,7 +40,7 @@ describe('config', () => {
     should.not.exist(pattern.match('foo.yml'));
   });
 
-  it('type: create', () => {
+  it('type: create', function() {
     var body = [
       'name:',
       '  first: John',
@@ -45,17 +53,19 @@ describe('config', () => {
       content: body
     });
 
-    return fs.writeFile(file.source, body).then(() => process(file)).then(() => {
+    return fs.writeFile(file.source, body).then(function() {
+      return process(file);
+    }).then(function() {
       hexo.theme.config.should.eql({
         name: {first: 'John', last: 'Doe'}
       });
-    }).finally(() => {
+    }).finally(function() {
       hexo.theme.config = {};
       return fs.unlink(file.source);
     });
   });
 
-  it('type: delete', () => {
+  it('type: delete', function() {
     var file = newFile({
       path: '_config.yml',
       type: 'delete'
@@ -63,23 +73,23 @@ describe('config', () => {
 
     hexo.theme.config = {foo: 'bar'};
 
-    return process(file).then(() => {
+    return process(file).then(function() {
       hexo.theme.config.should.eql({});
     });
   });
 
-  it('load failed', () => {
+  it('load failed', function() {
     var file = newFile({
       path: '_config.yml',
       type: 'create'
     });
 
-    var errorCallback = sinon.spy(err => {
+    var errorCallback = sinon.spy(function(err) {
       err.should.have.property('message', 'Theme config load failed.');
     });
 
-    return process(file).catch(errorCallback).finally(() => {
+    return process(file).catch(errorCallback).finally(function() {
       errorCallback.calledOnce.should.be.true;
-    }).catch(() => {}); // Catch again because it throws error
+    }).catch(function() {}); // Catch again because it throws error
   });
 });

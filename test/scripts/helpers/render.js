@@ -1,13 +1,17 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('render', () => {
+describe('render', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
   var render = require('../../../lib/plugins/helper/render')(hexo);
 
-  before(() => hexo.init());
+  before(function() {
+    return hexo.init();
+  });
 
-  it('default', () => {
+  it('default', function() {
     var body = [
       'foo: 1',
       'bar:',

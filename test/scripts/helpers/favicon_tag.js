@@ -1,6 +1,8 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('favicon_tag', () => {
+describe('favicon_tag', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
 
@@ -12,7 +14,7 @@ describe('favicon_tag', () => {
 
   var favicon = require('../../../lib/plugins/helper/favicon_tag').bind(ctx);
 
-  it('path', () => {
+  it('path', function() {
     favicon('favicon.ico').should.eql('<link rel="shortcut icon" href="/favicon.ico">');
   });
 });

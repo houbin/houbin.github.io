@@ -1,18 +1,20 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('Processor', () => {
+describe('Processor', function() {
   var Processor = require('../../../lib/extend/processor');
 
-  it('register()', () => {
+  it('register()', function() {
     var p = new Processor();
 
     // pattern, fn
-    p.register('test', () => {});
+    p.register('test', function() {});
 
     p.list()[0].should.exist;
 
     // fn
-    p.register(() => {});
+    p.register(function() {});
 
     p.list()[1].should.exist;
 
@@ -26,10 +28,10 @@ describe('Processor', () => {
     }
   });
 
-  it('list()', () => {
+  it('list()', function() {
     var p = new Processor();
 
-    p.register('test', () => {});
+    p.register('test', function() {});
 
     p.list().length.should.eql(1);
   });

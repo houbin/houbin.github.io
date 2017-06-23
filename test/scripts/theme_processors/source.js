@@ -1,9 +1,11 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var pathFn = require('path');
 var fs = require('hexo-fs');
 var Promise = require('bluebird');
 
-describe('source', () => {
+describe('source', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(pathFn.join(__dirname, 'source_test'), {silent: true});
   var processor = require('../../../lib/theme/processors/source');
@@ -14,21 +16,27 @@ describe('source', () => {
   function newFile(options) {
     var path = options.path;
 
-    options.params = {path};
+    options.params = {path: path};
     options.path = 'source/' + path;
     options.source = pathFn.join(themeDir, options.path);
 
     return new hexo.theme.File(options);
   }
 
-  before(() => Promise.all([
-    fs.mkdirs(themeDir),
-    fs.writeFile(hexo.config_path, 'theme: test')
-  ]).then(() => hexo.init()));
+  before(function() {
+    return Promise.all([
+      fs.mkdirs(themeDir),
+      fs.writeFile(hexo.config_path, 'theme: test')
+    ]).then(function() {
+      return hexo.init();
+    });
+  });
 
-  after(() => fs.rmdir(hexo.base_dir));
+  after(function() {
+    return fs.rmdir(hexo.base_dir);
+  });
 
-  it('pattern', () => {
+  it('pattern', function() {
     var pattern = processor.pattern;
 
     pattern.match('source/foo.jpg').should.eql({path: 'foo.jpg'});
@@ -42,7 +50,7 @@ describe('source', () => {
     pattern.match('source/node_modules/test/test.js').should.be.false;
   });
 
-  it('type: create', () => {
+  it('type: create', function() {
     var file = newFile({
       path: 'style.css',
       type: 'create'
@@ -50,7 +58,9 @@ describe('source', () => {
 
     var id = 'themes/test/' + file.path;
 
-    return fs.writeFile(file.source, 'test').then(() => process(file)).then(() => {
+    return fs.writeFile(file.source, 'test').then(function() {
+      return process(file);
+    }).then(function() {
       var asset = Asset.findById(id);
 
       asset._id.should.eql(id);
@@ -58,10 +68,12 @@ describe('source', () => {
       asset.modified.should.be.true;
 
       return asset.remove();
-    }).finally(() => fs.unlink(file.source));
+    }).finally(function() {
+      return fs.unlink(file.source);
+    });
   });
 
-  it('type: update', () => {
+  it('type: update', function() {
     var file = newFile({
       path: 'style.css',
       type: 'update'
@@ -76,17 +88,21 @@ describe('source', () => {
         path: file.params.path,
         modified: false
       })
-    ]).then(() => process(file)).then(() => {
+    ]).then(function() {
+      return process(file);
+    }).then(function() {
       var asset = Asset.findById(id);
 
       asset.modified.should.be.true;
-    }).finally(() => Promise.all([
-      fs.unlink(file.source),
-      Asset.removeById(id)
-    ]));
+    }).finally(function() {
+      return Promise.all([
+        fs.unlink(file.source),
+        Asset.removeById(id)
+      ]);
+    });
   });
 
-  it('type: skip', () => {
+  it('type: skip', function() {
     var file = newFile({
       path: 'style.css',
       type: 'skip'
@@ -101,17 +117,21 @@ describe('source', () => {
         path: file.params.path,
         modified: false
       })
-    ]).then(() => process(file)).then(() => {
+    ]).then(function() {
+      return process(file);
+    }).then(function() {
       var asset = Asset.findById(id);
 
       asset.modified.should.be.false;
-    }).finally(() => Promise.all([
-      fs.unlink(file.source),
-      Asset.removeById(id)
-    ]));
+    }).finally(function() {
+      return Promise.all([
+        fs.unlink(file.source),
+        Asset.removeById(id)
+      ]);
+    });
   });
 
-  it('type: delete', () => {
+  it('type: delete', function() {
     var file = newFile({
       path: 'style.css',
       type: 'delete'
@@ -122,7 +142,9 @@ describe('source', () => {
     return Asset.insert({
       _id: id,
       path: file.params.path
-    }).then(() => process(file)).then(() => {
+    }).then(function() {
+      return process(file);
+    }).then(function() {
       should.not.exist(Asset.findById(id));
     });
   });

@@ -1,9 +1,11 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var Promise = require('bluebird');
 var fs = require('hexo-fs');
 var pathFn = require('path');
 
-describe('data', () => {
+describe('data', function() {
   var Hexo = require('../../../lib/hexo');
   var baseDir = pathFn.join(__dirname, 'data_test');
   var hexo = new Hexo(baseDir);
@@ -17,7 +19,7 @@ describe('data', () => {
     var path = options.path;
 
     options.params = {
-      path
+      path: path
     };
 
     options.path = '_data/' + path;
@@ -26,11 +28,17 @@ describe('data', () => {
     return new File(options);
   }
 
-  before(() => fs.mkdirs(baseDir).then(() => hexo.init()));
+  before(function() {
+    return fs.mkdirs(baseDir).then(function() {
+      return hexo.init();
+    });
+  });
 
-  after(() => fs.rmdir(baseDir));
+  after(function() {
+    return fs.rmdir(baseDir);
+  });
 
-  it('pattern', () => {
+  it('pattern', function() {
     var pattern = processor.pattern;
 
     pattern.match('_data/users.json').should.be.ok;
@@ -38,7 +46,7 @@ describe('data', () => {
     should.not.exist(pattern.match('users.json'));
   });
 
-  it('type: create - yaml', () => {
+  it('type: create - yaml', function() {
     var body = 'foo: bar';
 
     var file = newFile({
@@ -46,16 +54,20 @@ describe('data', () => {
       type: 'create'
     });
 
-    return fs.writeFile(file.source, body).then(() => process(file)).then(() => {
+    return fs.writeFile(file.source, body).then(function() {
+      return process(file);
+    }).then(function() {
       var data = Data.findById('users');
 
       data.data.should.eql({foo: 'bar'});
 
       return data.remove();
-    }).finally(() => fs.unlink(file.source));
+    }).finally(function() {
+      return fs.unlink(file.source);
+    });
   });
 
-  it('type: create - json', () => {
+  it('type: create - json', function() {
     var body = '{"foo": 1}';
 
     var file = newFile({
@@ -63,31 +75,39 @@ describe('data', () => {
       type: 'create'
     });
 
-    return fs.writeFile(file.source, body).then(() => process(file)).then(() => {
+    return fs.writeFile(file.source, body).then(function() {
+      return process(file);
+    }).then(function() {
       var data = Data.findById('users');
 
       data.data.should.eql({foo: 1});
 
       return data.remove();
-    }).finally(() => fs.unlink(file.source));
+    }).finally(function() {
+      return fs.unlink(file.source);
+    });
   });
 
-  it('type: create - others', () => {
+  it('type: create - others', function() {
     var file = newFile({
       path: 'users.txt',
       type: 'create'
     });
 
-    return fs.writeFile(file.source, 'text').then(() => process(file)).then(() => {
+    return fs.writeFile(file.source, 'text').then(function() {
+      return process(file);
+    }).then(function() {
       var data = Data.findById('users');
 
       data.data.should.eql('text');
 
       return data.remove();
-    }).finally(() => fs.unlink(file.source));
+    }).finally(function() {
+      return fs.unlink(file.source);
+    });
   });
 
-  it('type: update', () => {
+  it('type: update', function() {
     var body = 'foo: bar';
 
     var file = newFile({
@@ -101,16 +121,20 @@ describe('data', () => {
         _id: 'users',
         data: {}
       })
-    ]).then(() => process(file)).then(() => {
+    ]).then(function() {
+      return process(file);
+    }).then(function() {
       var data = Data.findById('users');
 
       data.data.should.eql({foo: 'bar'});
 
       return data.remove();
-    }).finally(() => fs.unlink(file.source));
+    }).finally(function() {
+      return fs.unlink(file.source);
+    });
   });
 
-  it('type: delete', () => {
+  it('type: delete', function() {
     var file = newFile({
       path: 'users.yml',
       type: 'delete'
@@ -119,7 +143,9 @@ describe('data', () => {
     return Data.insert({
       _id: 'users',
       data: {foo: 'bar'}
-    }).then(() => process(file)).then(() => {
+    }).then(function() {
+      return process(file);
+    }).then(function() {
       should.not.exist(Data.findById('users'));
     });
   });

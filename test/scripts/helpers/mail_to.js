@@ -1,7 +1,9 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var qs = require('querystring');
 
-describe('mail_to', () => {
+describe('mail_to', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
 
@@ -13,20 +15,20 @@ describe('mail_to', () => {
 
   var mailto = require('../../../lib/plugins/helper/mail_to').bind(ctx);
 
-  it('path', () => {
+  it('path', function() {
     mailto('abc@example.com').should.eql('<a href="mailto:abc@example.com" title="abc@example.com">abc@example.com</a>');
   });
 
-  it('text', () => {
+  it('text', function() {
     mailto('abc@example.com', 'Email').should.eql('<a href="mailto:abc@example.com" title="Email">Email</a>');
   });
 
-  it('subject', () => {
+  it('subject', function() {
     mailto('abc@example.com', 'Email', {subject: 'Hello'})
       .should.eql('<a href="mailto:abc@example.com?subject=Hello" title="Email">Email</a>');
   });
 
-  it('cc (string)', () => {
+  it('cc (string)', function() {
     var data = {cc: 'abc@abc.com'};
     var querystring = qs.stringify(data);
 
@@ -34,7 +36,7 @@ describe('mail_to', () => {
       .should.eql('<a href="mailto:abc@example.com?' + querystring + '" title="Email">Email</a>');
   });
 
-  it('cc (array)', () => {
+  it('cc (array)', function() {
     var data = {cc: 'abc@abc.com,bcd@bcd.com'};
     var querystring = qs.stringify(data);
 
@@ -42,7 +44,7 @@ describe('mail_to', () => {
       .should.eql('<a href="mailto:abc@example.com?' + querystring + '" title="Email">Email</a>');
   });
 
-  it('bcc (string)', () => {
+  it('bcc (string)', function() {
     var data = {bcc: 'abc@abc.com'};
     var querystring = qs.stringify(data);
 
@@ -50,7 +52,7 @@ describe('mail_to', () => {
       .should.eql('<a href="mailto:abc@example.com?' + querystring + '" title="Email">Email</a>');
   });
 
-  it('bcc (array)', () => {
+  it('bcc (array)', function() {
     var data = {bcc: 'abc@abc.com,bcd@bcd.com'};
     var querystring = qs.stringify(data);
 
@@ -58,22 +60,22 @@ describe('mail_to', () => {
       .should.eql('<a href="mailto:abc@example.com?' + querystring + '" title="Email">Email</a>');
   });
 
-  it('body', () => {
+  it('body', function() {
     mailto('abc@example.com', 'Email', {body: 'Hello'})
       .should.eql('<a href="mailto:abc@example.com?body=Hello" title="Email">Email</a>');
   });
 
-  it('class (string)', () => {
+  it('class (string)', function() {
     mailto('abc@example.com', 'Email', {class: 'foo'})
       .should.eql('<a href="mailto:abc@example.com" title="Email" class="foo">Email</a>');
   });
 
-  it('class (array)', () => {
+  it('class (array)', function() {
     mailto('abc@example.com', 'Email', {class: ['foo', 'bar']})
       .should.eql('<a href="mailto:abc@example.com" title="Email" class="foo bar">Email</a>');
   });
 
-  it('id', () => {
+  it('id', function() {
     mailto('abc@example.com', 'Email', {id: 'foo'})
       .should.eql('<a href="mailto:abc@example.com" title="Email" id="foo">Email</a>');
   });

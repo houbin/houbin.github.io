@@ -1,7 +1,9 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var Promise = require('bluebird');
 
-describe('list_tags', () => {
+describe('list_tags', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
   var Post = hexo.model('Post');
@@ -15,23 +17,31 @@ describe('list_tags', () => {
 
   var listTags = require('../../../lib/plugins/helper/list_tags').bind(ctx);
 
-  before(() => hexo.init().then(() => Post.insert([
-    {source: 'foo', slug: 'foo'},
-    {source: 'bar', slug: 'bar'},
-    {source: 'baz', slug: 'baz'},
-    {source: 'boo', slug: 'boo'}
-  ])).then(posts => // TODO: Warehouse needs to add a mutex lock when writing data to avoid data sync problem
-  Promise.each([
-    ['foo'],
-    ['baz'],
-    ['baz'],
-    ['bar']
-  ], (tags, i) => posts[i].setTags(tags))).then(() => {
-    hexo.locals.invalidate();
-    ctx.site = hexo.locals.toObject();
-  }));
+  before(function() {
+    return hexo.init().then(function() {
+      return Post.insert([
+        {source: 'foo', slug: 'foo'},
+        {source: 'bar', slug: 'bar'},
+        {source: 'baz', slug: 'baz'},
+        {source: 'boo', slug: 'boo'}
+      ]);
+    }).then(function(posts) {
+      // TODO: Warehouse needs to add a mutex lock when writing data to avoid data sync problem
+      return Promise.each([
+        ['foo'],
+        ['baz'],
+        ['baz'],
+        ['bar']
+      ], function(tags, i) {
+        return posts[i].setTags(tags);
+      });
+    }).then(function() {
+      hexo.locals.invalidate();
+      ctx.site = hexo.locals.toObject();
+    });
+  });
 
-  it('default', () => {
+  it('default', function() {
     var result = listTags();
 
     result.should.eql([
@@ -43,7 +53,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('specified collection', () => {
+  it('specified collection', function() {
     var result = listTags(Tag.find({
       name: /^b/
     }));
@@ -56,7 +66,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('style: false', () => {
+  it('style: false', function() {
     var result = listTags({
       style: false
     });
@@ -68,7 +78,7 @@ describe('list_tags', () => {
     ].join(', '));
   });
 
-  it('show_count: false', () => {
+  it('show_count: false', function() {
     var result = listTags({
       show_count: false
     });
@@ -82,7 +92,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('class', () => {
+  it('class', function() {
     var result = listTags({
       class: 'test'
     });
@@ -96,7 +106,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('orderby', () => {
+  it('orderby', function() {
     var result = listTags({
       orderby: 'length'
     });
@@ -110,7 +120,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('order', () => {
+  it('order', function() {
     var result = listTags({
       order: -1
     });
@@ -124,9 +134,9 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('transform', () => {
+  it('transform', function() {
     var result = listTags({
-      transform(name) {
+      transform: function(name) {
         return name.toUpperCase();
       }
     });
@@ -140,7 +150,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('separator', () => {
+  it('separator', function() {
     var result = listTags({
       style: false,
       separator: ''
@@ -153,7 +163,7 @@ describe('list_tags', () => {
     ].join(''));
   });
 
-  it('amount', () => {
+  it('amount', function() {
     var result = listTags({
       amount: 2
     });

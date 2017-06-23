@@ -1,13 +1,15 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('Deployer', () => {
+describe('Deployer', function() {
   var Deployer = require('../../../lib/extend/deployer');
 
-  it('register()', () => {
+  it('register()', function() {
     var d = new Deployer();
 
     // name, fn
-    d.register('test', () => {});
+    d.register('test', function() {});
 
     d.get('test').should.exist;
 
@@ -30,48 +32,48 @@ describe('Deployer', () => {
     }
   });
 
-  it('register() - promisify', () => {
+  it('register() - promisify', function() {
     var d = new Deployer();
 
-    d.register('test', (args, callback) => {
+    d.register('test', function(args, callback) {
       args.should.eql({foo: 'bar'});
       callback(null, 'foo');
     });
 
     d.get('test')({
       foo: 'bar'
-    }).then(result => {
+    }).then(function(result) {
       result.should.eql('foo');
     });
   });
 
-  it('register() - Promise.method', () => {
+  it('register() - Promise.method', function() {
     var d = new Deployer();
 
-    d.register('test', args => {
+    d.register('test', function(args) {
       args.should.eql({foo: 'bar'});
       return 'foo';
     });
 
     d.get('test')({
       foo: 'bar'
-    }).then(result => {
+    }).then(function(result) {
       result.should.eql('foo');
     });
   });
 
-  it('list()', () => {
+  it('list()', function() {
     var d = new Deployer();
 
-    d.register('test', () => {});
+    d.register('test', function() {});
 
     d.list().should.have.keys(['test']);
   });
 
-  it('get()', () => {
+  it('get()', function() {
     var d = new Deployer();
 
-    d.register('test', () => {});
+    d.register('test', function() {});
 
     d.get('test').should.exist;
   });

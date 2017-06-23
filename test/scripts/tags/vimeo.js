@@ -1,10 +1,12 @@
+'use strict';
+
 var cheerio = require('cheerio');
 var should = require('chai').should(); // eslint-disable-line
 
-describe('vimeo', () => {
+describe('vimeo', function() {
   var vimeo = require('../../../lib/plugins/tag/vimeo');
 
-  it('id', () => {
+  it('id', function() {
     var $ = cheerio.load(vimeo(['foo']));
 
     $('.video-container').html().should.be.ok;

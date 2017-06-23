@@ -1,9 +1,11 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var pathFn = require('path');
 var fs = require('hexo-fs');
 var Promise = require('bluebird');
 
-describe('view', () => {
+describe('view', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(pathFn.join(__dirname, 'view_test'), {silent: true});
   var processor = require('../../../lib/theme/processors/view');
@@ -15,21 +17,27 @@ describe('view', () => {
   function newFile(options) {
     var path = options.path;
 
-    options.params = {path};
+    options.params = {path: path};
     options.path = 'layout/' + path;
     options.source = pathFn.join(themeDir, options.path);
 
     return new hexo.theme.File(options);
   }
 
-  before(() => Promise.all([
-    fs.mkdirs(themeDir),
-    fs.writeFile(hexo.config_path, 'theme: test')
-  ]).then(() => hexo.init()));
+  before(function() {
+    return Promise.all([
+      fs.mkdirs(themeDir),
+      fs.writeFile(hexo.config_path, 'theme: test')
+    ]).then(function() {
+      return hexo.init();
+    });
+  });
 
-  after(() => fs.rmdir(hexo.base_dir));
+  after(function() {
+    return fs.rmdir(hexo.base_dir);
+  });
 
-  it('pattern', () => {
+  it('pattern', function() {
     var pattern = processor.pattern;
 
     pattern.match('layout/index.swig').path.should.eql('index.swig');
@@ -37,7 +45,7 @@ describe('view', () => {
     should.not.exist(pattern.match('view/index.swig'));
   });
 
-  it('type: create', () => {
+  it('type: create', function() {
     var body = [
       'foo: bar',
       '---',
@@ -49,7 +57,9 @@ describe('view', () => {
       type: 'create'
     });
 
-    return fs.writeFile(file.source, body).then(() => process(file)).then(() => {
+    return fs.writeFile(file.source, body).then(function() {
+      return process(file);
+    }).then(function() {
       var view = hexo.theme.getView('index.swig');
 
       view.path.should.eql('index.swig');
@@ -58,19 +68,19 @@ describe('view', () => {
         foo: 'bar',
         _content: 'test'
       });
-    }).finally(() => {
+    }).finally(function() {
       hexo.theme.removeView('index.swig');
       return fs.unlink(file.source);
     });
   });
 
-  it('type: delete', () => {
+  it('type: delete', function() {
     var file = newFile({
       path: 'index.swig',
       type: 'delete'
     });
 
-    return process(file).then(() => {
+    return process(file).then(function() {
       should.not.exist(hexo.theme.getView('index.swig'));
     });
   });

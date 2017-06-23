@@ -1,10 +1,12 @@
+'use strict';
+
 var pathFn = require('path');
 var should = require('chai').should(); // eslint-disable-line
 var fs = require('hexo-fs');
 var highlight = require('hexo-util').highlight;
 var Promise = require('bluebird');
 
-describe('include_code', () => {
+describe('include_code', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(pathFn.join(__dirname, 'include_code_test'));
   var includeCode = Promise.method(require('../../../lib/plugins/tag/include_code')(hexo));
@@ -20,51 +22,57 @@ describe('include_code', () => {
     return includeCode(args.split(' '));
   }
 
-  before(() => fs.writeFile(path, fixture));
+  before(function() {
+    return fs.writeFile(path, fixture);
+  });
 
-  after(() => fs.rmdir(hexo.base_dir));
+  after(function() {
+    return fs.rmdir(hexo.base_dir);
+  });
 
-  it('default', () => {
+  it('default', function() {
     var expected = highlight(fixture, {
       lang: 'js',
       caption: '<span>test.js</span><a href="/downloads/code/test.js">view raw</a>'
     });
 
-    return code('test.js').then(result => {
+    return code('test.js').then(function(result) {
       result.should.eql(expected);
     });
   });
 
-  it('title', () => {
+  it('title', function() {
     var expected = highlight(fixture, {
       lang: 'js',
       caption: '<span>Hello world</span><a href="/downloads/code/test.js">view raw</a>'
     });
 
-    return code('Hello world test.js').then(result => {
+    return code('Hello world test.js').then(function(result) {
       result.should.eql(expected);
     });
   });
 
-  it('lang', () => {
+  it('lang', function() {
     var expected = highlight(fixture, {
       lang: 'js',
       caption: '<span>Hello world</span><a href="/downloads/code/test.js">view raw</a>'
     });
 
-    return code('Hello world lang:js test.js').then(result => {
+    return code('Hello world lang:js test.js').then(function(result) {
       result.should.eql(expected);
     });
   });
 
-  it('file not found', () => code('nothing').then(result => {
-    should.not.exist(result);
-  }));
+  it('file not found', function() {
+    return code('nothing').then(function(result) {
+      should.not.exist(result);
+    });
+  });
 
-  it('disabled', () => {
+  it('disabled', function() {
     hexo.config.highlight.enable = false;
 
-    return code('test.js').then(result => {
+    return code('test.js').then(function(result) {
       result.should.eql('<pre><code>' + fixture + '</code></pre>');
       hexo.config.highlight.enable = true;
     });

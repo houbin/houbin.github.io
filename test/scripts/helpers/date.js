@@ -1,22 +1,24 @@
+'use strict';
+
 var moment = require('moment-timezone');
 var should = require('chai').should(); // eslint-disable-line
 var sinon = require('sinon');
 
-describe('date', () => {
+describe('date', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo();
   var dateHelper = require('../../../lib/plugins/helper/date');
   var clock;
 
-  before(() => {
+  before(function() {
     clock = sinon.useFakeTimers(Date.now());
   });
 
-  after(() => {
+  after(function() {
     clock.restore();
   });
 
-  it('date', () => {
+  it('date', function() {
     var ctx = {
       config: hexo.config,
       page: {}
@@ -55,7 +57,7 @@ describe('date', () => {
     ctx.config.timezone = '';
   });
 
-  it('date_xml', () => {
+  it('date_xml', function() {
     var dateXML = dateHelper.date_xml;
 
     // now
@@ -71,7 +73,7 @@ describe('date', () => {
     dateXML(Date.now()).should.eql(moment().toISOString());
   });
 
-  it('relative_date', () => {
+  it('relative_date', function() {
     var ctx = {
       config: hexo.config,
       page: {}
@@ -92,7 +94,7 @@ describe('date', () => {
     relativeDate(Date.now()).should.eql(moment().fromNow());
   });
 
-  it('time', () => {
+  it('time', function() {
     var ctx = {
       config: hexo.config,
       page: {}
@@ -131,7 +133,7 @@ describe('date', () => {
     ctx.config.timezone = '';
   });
 
-  it('full_date', () => {
+  it('full_date', function() {
     var ctx = {
       config: hexo.config,
       date: dateHelper.date,
@@ -173,7 +175,7 @@ describe('date', () => {
     ctx.config.timezone = '';
   });
 
-  it('time_tag', () => {
+  it('time_tag', function() {
     var ctx = {
       config: hexo.config,
       date: dateHelper.date,

@@ -1,13 +1,15 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('number_format', () => {
+describe('number_format', function() {
   var numberFormat = require('../../../lib/plugins/helper/number_format');
 
-  it('default', () => {
+  it('default', function() {
     numberFormat(1234.567).should.eql('1,234.567');
   });
 
-  it('precision', () => {
+  it('precision', function() {
     numberFormat(1234.567, {precision: false}).should.eql('1,234.567');
     numberFormat(1234.567, {precision: 0}).should.eql('1,234');
     numberFormat(1234.567, {precision: 1}).should.eql('1,234.6');
@@ -16,11 +18,11 @@ describe('number_format', () => {
     numberFormat(1234.567, {precision: 4}).should.eql('1,234.5670');
   });
 
-  it('delimiter', () => {
+  it('delimiter', function() {
     numberFormat(1234.567, {delimiter: ' '}).should.eql('1 234.567');
   });
 
-  it('separator', () => {
+  it('separator', function() {
     numberFormat(1234.567, {separator: '*'}).should.eql('1,234*567');
   });
 });

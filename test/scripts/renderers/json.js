@@ -1,9 +1,11 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('json', () => {
+describe('json', function() {
   var r = require('../../../lib/plugins/renderer/json');
 
-  it('normal', () => {
+  it('normal', function() {
     var data = {
       foo: 1,
       bar: {

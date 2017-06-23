@@ -1,3 +1,5 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var pathFn = require('path');
 var Promise = require('bluebird');
@@ -5,7 +7,7 @@ var fs = require('hexo-fs');
 var yaml = require('js-yaml');
 var _ = require('lodash');
 
-describe('File', () => {
+describe('File', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
   var Box = require('../../../lib/box');
@@ -30,47 +32,57 @@ describe('File', () => {
   function makeFile(path, props) {
     return new File(_.assign({
       source: pathFn.join(box.base, path),
-      path
+      path: path
     }, props));
   }
 
   var file = makeFile(path, {
     source: pathFn.join(box.base, path),
-    path,
+    path: path,
     type: 'create',
     params: {foo: 'bar'}
   });
 
-  before(() => Promise.all([
-    fs.writeFile(file.source, body),
-    hexo.init()
-  ]).then(() => fs.stat(file.source)));
+  before(function() {
+    return Promise.all([
+      fs.writeFile(file.source, body),
+      hexo.init()
+    ]).then(function() {
+      return fs.stat(file.source);
+    });
+  });
 
-  after(() => fs.rmdir(box.base));
+  after(function() {
+    return fs.rmdir(box.base);
+  });
 
-  it('read()', () => file.read().should.eventually.eql(body));
+  it('read()', function() {
+    return file.read().should.eventually.eql(body);
+  });
 
-  it('read() - callback', callback => {
-    file.read((err, content) => {
+  it('read() - callback', function(callback) {
+    file.read(function(err, content) {
       should.not.exist(err);
       content.should.eql(body);
       callback();
     });
   });
 
-  it('readSync()', () => {
+  it('readSync()', function() {
     file.readSync().should.eql(body);
   });
 
-  it('stat()', () => Promise.all([
-    fs.stat(file.source),
-    file.stat()
-  ]).then(stats => {
-    stats[0].should.eql(stats[1]);
-  }));
+  it('stat()', function() {
+    return Promise.all([
+      fs.stat(file.source),
+      file.stat()
+    ]).then(function(stats) {
+      stats[0].should.eql(stats[1]);
+    });
+  });
 
-  it('stat() - callback', callback => {
-    file.stat((err, fileStats) => {
+  it('stat() - callback', function(callback) {
+    file.stat(function(err, fileStats) {
       if (err) return callback(err);
 
       fileStats.should.eql(fs.statSync(file.source));
@@ -78,14 +90,16 @@ describe('File', () => {
     });
   });
 
-  it('statSync()', () => {
+  it('statSync()', function() {
     file.statSync().should.eql(fs.statSync(file.source));
   });
 
-  it('render()', () => file.render().should.eventually.eql(obj));
+  it('render()', function() {
+    return file.render().should.eventually.eql(obj);
+  });
 
-  it('render() - callback', callback => {
-    file.render((err, data) => {
+  it('render() - callback', function(callback) {
+    file.render(function(err, data) {
       if (err) return callback(err);
 
       data.should.eql(obj);
@@ -93,7 +107,7 @@ describe('File', () => {
     });
   });
 
-  it('renderSync()', () => {
+  it('renderSync()', function() {
     file.renderSync().should.eql(obj);
   });
 });

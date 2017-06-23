@@ -1,7 +1,9 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 var Promise = require('bluebird');
 
-describe('list_categories', () => {
+describe('list_categories', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
   var Post = hexo.model('Post');
@@ -15,23 +17,31 @@ describe('list_categories', () => {
 
   var listCategories = require('../../../lib/plugins/helper/list_categories').bind(ctx);
 
-  before(() => hexo.init().then(() => Post.insert([
-    {source: 'foo', slug: 'foo'},
-    {source: 'bar', slug: 'bar'},
-    {source: 'baz', slug: 'baz'},
-    {source: 'boo', slug: 'boo'}
-  ])).then(posts => Promise.each([
-    ['baz'],
-    ['baz', 'bar'],
-    ['foo'],
-    ['baz']
-  ], (cats, i) => posts[i].setCategories(cats))).then(() => {
-    hexo.locals.invalidate();
-    ctx.site = hexo.locals.toObject();
-    ctx.page = ctx.site.posts.data[1];
-  }));
+  before(function() {
+    return hexo.init().then(function() {
+      return Post.insert([
+        {source: 'foo', slug: 'foo'},
+        {source: 'bar', slug: 'bar'},
+        {source: 'baz', slug: 'baz'},
+        {source: 'boo', slug: 'boo'}
+      ]);
+    }).then(function(posts) {
+      return Promise.each([
+        ['baz'],
+        ['baz', 'bar'],
+        ['foo'],
+        ['baz']
+      ], function(cats, i) {
+        return posts[i].setCategories(cats);
+      });
+    }).then(function() {
+      hexo.locals.invalidate();
+      ctx.site = hexo.locals.toObject();
+      ctx.page = ctx.site.posts.data[1];
+    });
+  });
 
-  it('default', () => {
+  it('default', function() {
     var result = listCategories();
 
     result.should.eql([
@@ -51,7 +61,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('specified collection', () => {
+  it('specified collection', function() {
     var result = listCategories(Category.find({
       parent: {$exists: false}
     }));
@@ -68,7 +78,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('style: false', () => {
+  it('style: false', function() {
     var result = listCategories({
       style: false
     });
@@ -80,7 +90,7 @@ describe('list_categories', () => {
     ].join(', '));
   });
 
-  it('show_count: false', () => {
+  it('show_count: false', function() {
     var result = listCategories({
       show_count: false
     });
@@ -102,7 +112,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('class', () => {
+  it('class', function() {
     var result = listCategories({
       class: 'test'
     });
@@ -124,7 +134,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('depth', () => {
+  it('depth', function() {
     var result = listCategories({
       depth: 1
     });
@@ -141,7 +151,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('orderby', () => {
+  it('orderby', function() {
     var result = listCategories({
       orderby: 'length'
     });
@@ -163,7 +173,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('order', () => {
+  it('order', function() {
     var result = listCategories({
       order: -1
     });
@@ -185,9 +195,9 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('transform', () => {
+  it('transform', function() {
     var result = listCategories({
-      transform(name) {
+      transform: function(name) {
         return name.toUpperCase();
       }
     });
@@ -209,7 +219,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('separator', () => {
+  it('separator', function() {
     var result = listCategories({
       style: false,
       separator: ''
@@ -222,7 +232,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('children-indicator', () => {
+  it('children-indicator', function() {
     var result = listCategories({
       children_indicator: 'has-children'
     });
@@ -244,7 +254,7 @@ describe('list_categories', () => {
     ].join(''));
   });
 
-  it('show-current', () => {
+  it('show-current', function() {
     var result = listCategories({
       show_current: true
     });

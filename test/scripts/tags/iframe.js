@@ -1,10 +1,12 @@
+'use strict';
+
 var cheerio = require('cheerio');
 var should = require('chai').should(); // eslint-disable-line
 
-describe('iframe', () => {
+describe('iframe', function() {
   var iframe = require('../../../lib/plugins/tag/iframe');
 
-  it('url', () => {
+  it('url', function() {
     var $ = cheerio.load(iframe(['http://zespia.tw']));
 
     $('iframe').attr('src').should.eql('http://zespia.tw');
@@ -14,7 +16,7 @@ describe('iframe', () => {
     $('iframe').attr('allowfullscreen').should.eql('');
   });
 
-  it('width', () => {
+  it('width', function() {
     var $ = cheerio.load(iframe(['http://zespia.tw', '500']));
 
     $('iframe').attr('src').should.eql('http://zespia.tw');
@@ -24,7 +26,7 @@ describe('iframe', () => {
     $('iframe').attr('allowfullscreen').should.eql('');
   });
 
-  it('height', () => {
+  it('height', function() {
     var $ = cheerio.load(iframe(['http://zespia.tw', '500', '600']));
 
     $('iframe').attr('src').should.eql('http://zespia.tw');

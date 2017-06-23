@@ -1,6 +1,8 @@
+'use strict';
+
 var should = require('chai').should(); // eslint-disable-line
 
-describe('markdown', () => {
+describe('markdown', function() {
   var Hexo = require('../../../lib/hexo');
   var hexo = new Hexo(__dirname);
 
@@ -10,9 +12,13 @@ describe('markdown', () => {
 
   var markdown = require('../../../lib/plugins/helper/markdown').bind(ctx);
 
-  before(() => hexo.init().then(() => hexo.loadPlugin(require.resolve('hexo-renderer-marked'))));
+  before(function() {
+    return hexo.init().then(function() {
+      return hexo.loadPlugin(require.resolve('hexo-renderer-marked'));
+    });
+  });
 
-  it('default', () => {
+  it('default', function() {
     markdown('123456 **bold** and *italic*').should.eql('<p>123456 <strong>bold</strong> and <em>italic</em></p>\n');
   });
 });
