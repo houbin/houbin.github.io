@@ -1,0 +1,614 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ceph ceph-deploy," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="准备工作 最重要的是关闭防火墙和selinux（被这个坑惨了），就不说三遍了 所有的节点做好ssh无密码访问设置 /etc/hosts中设置好所有节点的ip 安装ceph需要的rpm包 确认/etc/ceph目录中没有任何文件 df -h命令查看用到的硬盘没有被挂载 /var/lib/ceph清空，然后创建osd目录 确认当前使用的python版本是2.6而非2.7.X  这里只是使用一个虚拟机中">
+<meta name="keywords" content="ceph ceph-deploy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用ceph-deploy创建ceph集群">
+<meta property="og:url" content="http://yoursite.com/2016/03/15/使用ceph-deploy创建ceph集群/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="准备工作 最重要的是关闭防火墙和selinux（被这个坑惨了），就不说三遍了 所有的节点做好ssh无密码访问设置 /etc/hosts中设置好所有节点的ip 安装ceph需要的rpm包 确认/etc/ceph目录中没有任何文件 df -h命令查看用到的硬盘没有被挂载 /var/lib/ceph清空，然后创建osd目录 确认当前使用的python版本是2.6而非2.7.X  这里只是使用一个虚拟机中">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-03T00:38:34.008Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用ceph-deploy创建ceph集群">
+<meta name="twitter:description" content="准备工作 最重要的是关闭防火墙和selinux（被这个坑惨了），就不说三遍了 所有的节点做好ssh无密码访问设置 /etc/hosts中设置好所有节点的ip 安装ceph需要的rpm包 确认/etc/ceph目录中没有任何文件 df -h命令查看用到的硬盘没有被挂载 /var/lib/ceph清空，然后创建osd目录 确认当前使用的python版本是2.6而非2.7.X  这里只是使用一个虚拟机中">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/15/使用ceph-deploy创建ceph集群/"/>
+
+
+  <title> 使用ceph-deploy创建ceph集群 | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                使用ceph-deploy创建ceph集群
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-15T11:37:34+08:00" content="2016-03-15">
+              2016-03-15
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ul>
+<li>最重要的是关闭防火墙和selinux（被这个坑惨了），就不说三遍了</li>
+<li>所有的节点做好ssh无密码访问设置</li>
+<li>/etc/hosts中设置好所有节点的ip</li>
+<li>安装ceph需要的rpm包</li>
+<li>确认/etc/ceph目录中没有任何文件</li>
+<li>df -h命令查看用到的硬盘没有被挂载</li>
+<li>/var/lib/ceph清空，然后创建osd目录</li>
+<li>确认当前使用的python版本是2.6而非2.7.X</li>
+</ul>
+<p>这里只是使用一个虚拟机中的三块硬盘做一个单节点ceph集群</p>
+<a id="more"></a>
+<h2 id="mkdir-ceph-deploy"><a href="#mkdir-ceph-deploy" class="headerlink" title="mkdir ceph-deploy"></a>mkdir ceph-deploy</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc hou]# mkdir ceph-deploy</div></pre></td></tr></table></figure>
+<p>创建一个用于deploy的目录</p>
+<h2 id="Create-a-cluster"><a href="#Create-a-cluster" class="headerlink" title="Create a cluster"></a>Create a cluster</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph]# ceph-deploy new pc</div></pre></td></tr></table></figure>
+<p>pc为本机的HOSTNAME，该命令会创建三个文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ls</div><div class="line">ceph.conf  ceph.log  ceph.mon.keyring</div></pre></td></tr></table></figure>
+<p>由于我是在单个节点上部署集群，所以需要在ceph.conf中添加<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">osd pool default size = 1</div><div class="line">osd crush chooseleaf type = 0</div></pre></td></tr></table></figure></p>
+<h2 id="Add-a-monitor"><a href="#Add-a-monitor" class="headerlink" title="Add a monitor"></a>Add a monitor</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph]# ceph-deploy mon create pc</div></pre></td></tr></table></figure>
+<p>该命令创建一个monitor</p>
+<h2 id="Gather-key"><a href="#Gather-key" class="headerlink" title="Gather key"></a>Gather key</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph-deploy gatherkeys pc</div></pre></td></tr></table></figure>
+<p>该命令收集以下的keyring文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ls</div><div class="line">ceph.bootstrap-mds.keyring  ceph.bootstrap-osd.keyring</div><div class="line">ceph.client.admin.keyring  ceph.conf  ceph.log  ceph.mon.keyring</div></pre></td></tr></table></figure></p>
+<p>这三个keyring文件用户启动mds、启动osd和client连接使用。</p>
+<h2 id="Add-osds"><a href="#Add-osds" class="headerlink" title="Add osds"></a>Add osds</h2><p>1.list osd<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph-deploy disk list pc</div><div class="line">。。。</div><div class="line">[pc][WARNIN] WARNING:ceph-disk:Old blkid does not support ID_PART_ENTRY_* fields, trying sgdisk; may not correctly identify ceph volumes with dmcrypt</div><div class="line">[pc][DEBUG ] /dev/sda :</div><div class="line">[pc][DEBUG ]  /dev/sda1 other, ext4, mounted on /boot</div><div class="line">[pc][DEBUG ]  /dev/sda2 other, LVM2_member</div><div class="line">[pc][DEBUG ] /dev/sdb :</div><div class="line">[pc][DEBUG ]  /dev/sdb1 ceph data, prepared, unknown cluster cc315a0b-b0bf-4540-bc58-92af48fb8708, osd.0, journal /dev/sdb2</div><div class="line">[pc][DEBUG ]  /dev/sdb2 ceph journal, for /dev/sdb1</div><div class="line">[pc][DEBUG ] /dev/sdc :</div><div class="line">[pc][DEBUG ]  /dev/sdc1 ceph data, prepared, unknown cluster cc315a0b-b0bf-4540-bc58-92af48fb8708, osd.1, journal /dev/sdc2</div><div class="line">[pc][DEBUG ]  /dev/sdc2 ceph journal, for /dev/sdc1</div><div class="line">[pc][DEBUG ] /dev/sdd :</div><div class="line">[pc][DEBUG ]  /dev/sdd1 ceph data, prepared, unknown cluster cc315a0b-b0bf-4540-bc58-92af48fb8708, osd.2, journal /dev/sdd2</div><div class="line">[pc][DEBUG ]  /dev/sdd2 ceph journal, for /dev/sdd1</div><div class="line">[pc][DEBUG ] /dev/sr0 other, unknown</div></pre></td></tr></table></figure></p>
+<p>2.zap disks<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph-deploy disk zap pc:sdb pc:sdc pc:sdd</div></pre></td></tr></table></figure></p>
+<p>3.create osd<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph-deploy osd create pc:sdb pc:sdc pc:sdd</div></pre></td></tr></table></figure></p>
+<p>4.ceph status<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph -s</div><div class="line">    cluster 16d3b2f2-b4e9-4fd5-bd5b-bac2c2939220</div><div class="line">     health HEALTH_OK</div><div class="line">     monmap e1: 1 mons at &#123;pc=192.168.222.128:6789/0&#125;, election epoch 2, quorum 0 pc</div><div class="line">     osdmap e13: 3 osds: 3 up, 3 in</div><div class="line">      pgmap v20: 64 pgs, 1 pools, 0 bytes data, 0 objects</div><div class="line">            69960 kB used, 30629 MB / 30697 MB avail</div><div class="line">                  64 active+clean</div></pre></td></tr></table></figure></p>
+<h2 id="Add-mds"><a href="#Add-mds" class="headerlink" title="Add mds"></a>Add mds</h2><p>若只需要对象存储和块存储，mds进程是不需要的。mds作用是提供文件系统的操作。</p>
+<p>1.在对应节点添加/var/lib/ceph/mds目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph]# mkdir mds</div></pre></td></tr></table></figure></p>
+<p>2.添加mds<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph-deploy mds create pc</div></pre></td></tr></table></figure></p>
+<p>3.ceph status<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph -s</div><div class="line">    cluster 16d3b2f2-b4e9-4fd5-bd5b-bac2c2939220</div><div class="line">     health HEALTH_OK</div><div class="line">     monmap e1: 1 mons at &#123;pc=192.168.222.128:6789/0&#125;, election epoch 2, quorum 0 pc</div><div class="line">     osdmap e13: 3 osds: 3 up, 3 in</div><div class="line">      pgmap v25: 64 pgs, 1 pools, 0 bytes data, 0 objects</div><div class="line">            103 MB used, 45943 MB / 46046 MB avail</div><div class="line">                  64 active+clean</div></pre></td></tr></table></figure></p>
+<h2 id="一些命令"><a href="#一些命令" class="headerlink" title="一些命令"></a>一些命令</h2><p>1.停止集群<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# service ceph stop</div></pre></td></tr></table></figure></p>
+<p>2.推送配置文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph-deploy admin pc</div></pre></td></tr></table></figure></p>
+<p>3.查看所有的osd信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# ceph osd tree</div><div class="line"># id	weight	type name	up/down	reweight</div><div class="line">-1	0.02998	root default</div><div class="line">-2	0.02998		host pc</div><div class="line">0	0.009995			osd.0	up	1</div><div class="line">1	0.009995			osd.1	up	1</div><div class="line">2	0.009995			osd.2	up	1</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ceph-ceph-deploy/" rel="tag">#ceph ceph-deploy</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/12/HDFS整体介绍/" rel="next" title="HDFS整体介绍">
+                <i class="fa fa-chevron-left"></i> HDFS整体介绍
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/16/ceph中使用civetweb运行radosgw/" rel="prev" title="ceph中使用civetweb运行radosgw">
+                ceph中使用civetweb运行radosgw <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mkdir-ceph-deploy"><span class="nav-number">2.</span> <span class="nav-text">mkdir ceph-deploy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Create-a-cluster"><span class="nav-number">3.</span> <span class="nav-text">Create a cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Add-a-monitor"><span class="nav-number">4.</span> <span class="nav-text">Add a monitor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gather-key"><span class="nav-number">5.</span> <span class="nav-text">Gather key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Add-osds"><span class="nav-number">6.</span> <span class="nav-text">Add osds</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Add-mds"><span class="nav-number">7.</span> <span class="nav-text">Add mds</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些命令"><span class="nav-number">8.</span> <span class="nav-text">一些命令</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

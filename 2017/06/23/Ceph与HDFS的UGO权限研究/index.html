@@ -1,0 +1,588 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ceph HDFS ugo," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="文章目的写本文章是由于想使用ceph替换HDFS，来作为hadoop的底层存储。ceph的文件目录权限完全兼容posix，HDFS的文件目录权限只是兼容了一部分，另外有一些是特别的，所以需要也用于比较ceph与HDFS的权限区别，尽量使得ceph与HDFS的UGO权限检查兼容，介于个人能力有限，所以可能有所纰漏，请指正。">
+<meta name="keywords" content="ceph HDFS ugo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ceph与HDFS的UGO权限研究">
+<meta property="og:url" content="http://yoursite.com/2017/06/23/Ceph与HDFS的UGO权限研究/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="文章目的写本文章是由于想使用ceph替换HDFS，来作为hadoop的底层存储。ceph的文件目录权限完全兼容posix，HDFS的文件目录权限只是兼容了一部分，另外有一些是特别的，所以需要也用于比较ceph与HDFS的权限区别，尽量使得ceph与HDFS的UGO权限检查兼容，介于个人能力有限，所以可能有所纰漏，请指正。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-03T00:38:34.007Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ceph与HDFS的UGO权限研究">
+<meta name="twitter:description" content="文章目的写本文章是由于想使用ceph替换HDFS，来作为hadoop的底层存储。ceph的文件目录权限完全兼容posix，HDFS的文件目录权限只是兼容了一部分，另外有一些是特别的，所以需要也用于比较ceph与HDFS的权限区别，尽量使得ceph与HDFS的UGO权限检查兼容，介于个人能力有限，所以可能有所纰漏，请指正。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/06/23/Ceph与HDFS的UGO权限研究/"/>
+
+
+  <title> Ceph与HDFS的UGO权限研究 | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Ceph与HDFS的UGO权限研究
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-06-23T00:48:07+08:00" content="2017-06-23">
+              2017-06-23
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="文章目的"><a href="#文章目的" class="headerlink" title="文章目的"></a>文章目的</h1><p>写本文章是由于想使用ceph替换HDFS，来作为hadoop的底层存储。ceph的文件目录权限完全兼容posix，HDFS的文件目录权限只是兼容了一部分，另外有一些是特别的，所以需要也用于比较ceph与HDFS的权限区别，尽量使得ceph与HDFS的UGO权限检查兼容，介于个人能力有限，所以可能有所纰漏，请指正。</p>
+ <a id="more"></a>
+<h1 id="CEPH的ugo权限"><a href="#CEPH的ugo权限" class="headerlink" title="CEPH的ugo权限"></a>CEPH的ugo权限</h1><p>这里以fuse挂载为例说明。</p>
+<p>当通过fuse客户端访问ceph文件系统时，fuse client获取操作用户的uid，在client完成UGO权限的验证，代码如下图所示。但是这样需要保证集群和客户端所有机器设置的uid和gid保持一致。</p>
+<p>fuse客户端默认UGO权限：目录为755，文件为644。</p>
+<h1 id="HDFS的ugo权限"><a href="#HDFS的ugo权限" class="headerlink" title="HDFS的ugo权限"></a>HDFS的ugo权限</h1><p>HDFS用户和组确定有两种方式：simple和kerberos，由参数“hadoop.security.authentication”来进行配置，这里只讨论simple。</p>
+<p>HDFS的文件和目录权限模型共享了POSIX模型的很多部分，比如每个文件和目录都有user和group，文件对于user、group、other分别有不同的权限设置，HDFS在文件和目录的rwx权限检查与posix一致。</p>
+<p>HDFS默认UGO权限：目录为755，文件为644，这个与ceph一致。</p>
+<p>不同的是HDFS的权限检查是在namenode进行的，HDFS的超级用户为namenode的启动用户，可以通过配置“dfs.permissions.superusergroup=hdfs”来配置超级用户所在的组，目前所有的hortonworks的发行版，超级用户为hdfs，超级用户组为hdfs。</p>
+<p>HDFS的权限控制有两种：simple和kerberos，</p>
+<p>与ceph实现区别是HDFS的客户端获取到当前进程的用户名后，将用户名和操作发送到namenode，namenode根据用户名获取用户所在的组，因此使用的用户 - 组的映射关系是namenode所在机器上的映射关系。</p>
+<h2 id="ceph支持HDFS的权限"><a href="#ceph支持HDFS的权限" class="headerlink" title="ceph支持HDFS的权限"></a>ceph支持HDFS的权限</h2><p>目前想法是ceph中添加一个超级用户列表配置，对于超级用户列表中的用户，在fuse client认为是超级用户，从而检查永远不失败。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ceph-HDFS-ugo/" rel="tag">#ceph HDFS ugo</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/08/keystone验证流程分析/" rel="next" title="keystone认证流程分析">
+                <i class="fa fa-chevron-left"></i> keystone认证流程分析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#文章目的"><span class="nav-number">1.</span> <span class="nav-text">文章目的</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CEPH的ugo权限"><span class="nav-number">2.</span> <span class="nav-text">CEPH的ugo权限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HDFS的ugo权限"><span class="nav-number">3.</span> <span class="nav-text">HDFS的ugo权限</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ceph支持HDFS的权限"><span class="nav-number">3.1.</span> <span class="nav-text">ceph支持HDFS的权限</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

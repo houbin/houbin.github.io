@@ -1,0 +1,630 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="java,jni,c++,so," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="在学习hadoop中集成ceph作为文件系统存储时，发现hadoop是通过如下调用过程来完成对ceph的使用。 hadoop-ceph.jar  -&amp;gt;  libcephfs.jar  -&amp;gt;  libcephfs_jni.so  -&amp;gt;  libcephfs.so 在此过程中，用到了JNI这种允许java直接调用so的技术，特学习并分享出来。">
+<meta name="keywords" content="java,jni,c++,so">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java使用jni调用c++的so">
+<meta property="og:url" content="http://yoursite.com/2016/04/04/java使用jni调用c-的so/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="在学习hadoop中集成ceph作为文件系统存储时，发现hadoop是通过如下调用过程来完成对ceph的使用。 hadoop-ceph.jar  -&amp;gt;  libcephfs.jar  -&amp;gt;  libcephfs_jni.so  -&amp;gt;  libcephfs.so 在此过程中，用到了JNI这种允许java直接调用so的技术，特学习并分享出来。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-03T00:38:34.008Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java使用jni调用c++的so">
+<meta name="twitter:description" content="在学习hadoop中集成ceph作为文件系统存储时，发现hadoop是通过如下调用过程来完成对ceph的使用。 hadoop-ceph.jar  -&amp;gt;  libcephfs.jar  -&amp;gt;  libcephfs_jni.so  -&amp;gt;  libcephfs.so 在此过程中，用到了JNI这种允许java直接调用so的技术，特学习并分享出来。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/04/java使用jni调用c-的so/"/>
+
+
+  <title> java使用jni调用c++的so | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                java使用jni调用c++的so
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-04T09:17:55+08:00" content="2016-04-04">
+              2016-04-04
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/ceph/" itemprop="url" rel="index">
+                    <span itemprop="name">ceph</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在学习hadoop中集成ceph作为文件系统存储时，发现hadoop是通过如下调用过程来完成对ceph的使用。</p>
+<p>hadoop-ceph.jar  -&gt;  libcephfs.jar  -&gt;  libcephfs_jni.so  -&gt;  libcephfs.so</p>
+<p>在此过程中，用到了JNI这种允许java直接调用so的技术，特学习并分享出来。</p>
+<a id="more"></a>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ul>
+<li>安装jdk</li>
+<li>gcc编译环境</li>
+</ul>
+<h2 id="java调用方"><a href="#java调用方" class="headerlink" title="java调用方"></a>java调用方</h2><p>java端测试程序代码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">package com.houbin.jni;</div><div class="line"></div><div class="line">public class Hello</div><div class="line">&#123;</div><div class="line">    static</div><div class="line">    &#123;</div><div class="line">        try</div><div class="line">        &#123;</div><div class="line">            System.loadLibrary(&quot;hello&quot;);</div><div class="line">        &#125;</div><div class="line">        catch (UnsatisfiedLinkError e)</div><div class="line">        &#123;</div><div class="line">            System.err.println(&quot;cannot load library: \n&quot; + e.toString());</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public native static void native_say_hello(String strName);</div><div class="line"></div><div class="line">    public static void SayHello(String name)</div><div class="line">    &#123;</div><div class="line">        native_say_hello(name);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String args[])</div><div class="line">    &#123;</div><div class="line">        System.out.println(System.getProperty(&quot;java.library.path&quot;));</div><div class="line">        SayHello(&quot;123456&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中，java需要so中的方法使用native来标识，这个示例程序中只需要一个so的方法如下：</p>
+<p>public native static void native_say_hello(String strName);</p>
+<h3 id="编译java代码"><a href="#编译java代码" class="headerlink" title="编译java代码"></a>编译java代码</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]<span class="comment"># javac -d . Hello.java</span></div></pre></td></tr></table></figure>
+<p>该命令会在当前目录生成对应的目录和class文件</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]<span class="comment"># tree</span></div><div class="line">.</div><div class="line">├── com</div><div class="line">│   └── houbin</div><div class="line">│       └── jni</div><div class="line">│           └── Hello.class</div></pre></td></tr></table></figure>
+<h3 id="生成头文件"><a href="#生成头文件" class="headerlink" title="生成头文件"></a>生成头文件</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]<span class="comment"># javah com.houbin.jni.Hello</span></div></pre></td></tr></table></figure>
+<p>该命令会生成对应的头文件，该头文件用于标明c++代码中需要实现的方法<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]<span class="comment"># ll</span></div><div class="line">total <span class="number">32</span></div><div class="line">drwxr-xr-x <span class="number">3</span> root root <span class="number">4096</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">25</span> com</div><div class="line">-rw-r--r-- <span class="number">1</span> root root  <span class="number">477</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">26</span> com_houbin_jni_Hello.h</div><div class="line"></div><div class="line">[root@pc jni]<span class="comment"># cat com_houbin_jni_Hello.h</span></div><div class="line">/* <span class="keyword">DO</span> NOT EDIT THIS FILE - it is machine generated */</div><div class="line"><span class="comment">#include &lt;jni.h&gt;</span></div><div class="line">/* Header <span class="keyword">for</span> class com_houbin_jni_Hello */</div><div class="line"></div><div class="line"><span class="comment">#ifndef _Included_com_houbin_jni_Hello</span></div><div class="line"><span class="comment">#define _Included_com_houbin_jni_Hello</span></div><div class="line"><span class="comment">#ifdef __cplusplus</span></div><div class="line">extern <span class="string">"C"</span> &#123;</div><div class="line"><span class="comment">#endif</span></div><div class="line">/*</div><div class="line"> * Class:     com_houbin_jni_Hello</div><div class="line"> * Method:    native_say_hello</div><div class="line"> * Signature: (Ljava/lang/String;)V</div><div class="line"> */</div><div class="line">JNIEXPORT void JNICALL Java_com_houbin_jni_Hello_native_1say_1hello</div><div class="line">  (JNIEnv *, jclass, jstring);</div><div class="line"></div><div class="line"><span class="comment">#ifdef __cplusplus</span></div><div class="line">&#125;</div><div class="line"><span class="comment">#endif</span></div><div class="line"><span class="comment">#endif</span></div></pre></td></tr></table></figure></p>
+<p>至此，java调用方代码工作完成。</p>
+<h2 id="c-实现so"><a href="#c-实现so" class="headerlink" title="c++实现so"></a>c++实现so</h2><h3 id="实现java生成头文件中所需的接口"><a href="#实现java生成头文件中所需的接口" class="headerlink" title="实现java生成头文件中所需的接口"></a>实现java生成头文件中所需的接口</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]# cat hello.cc</div><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &quot;com_houbin_jni_Hello.h&quot;</div><div class="line"></div><div class="line">JNIEXPORT void JNICALL Java_com_houbin_jni_Hello_native_1say_1hello</div><div class="line">  (JNIEnv *env, jclass clz, jstring j_name)</div><div class="line">&#123;</div><div class="line">    const char *name = NULL;</div><div class="line">    if (j_name)</div><div class="line">    &#123;</div><div class="line">        name = env-&gt;GetStringUTFChars(j_name, NULL);</div><div class="line">        if (!name)</div><div class="line">        &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    printf(&quot;come from c, name is %s\n&quot;, name);</div><div class="line">    return;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>比较简单，没有做异常的处理，请见谅。</p>
+<h3 id="编译hello-cc文件为libhello-so"><a href="#编译hello-cc文件为libhello-so" class="headerlink" title="编译hello.cc文件为libhello.so"></a>编译hello.cc文件为libhello.so</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]<span class="comment"># g++ -fPIC  -D_REENTRANT -I/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.95.x86_64/include/ -I/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.95.x86_64/include/linux/ -c hello.cc</span></div><div class="line">[root@pc jni]<span class="comment"># g++ -shared hello.o -o libhello.so</span></div><div class="line">[root@pc jni]<span class="comment"># ll</span></div><div class="line">total <span class="number">32</span></div><div class="line">drwxr-xr-x <span class="number">3</span> root root <span class="number">4096</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">25</span> com</div><div class="line">-rw-r--r-- <span class="number">1</span> root root  <span class="number">477</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">26</span> com_houbin_jni_Hello.h</div><div class="line">-rw-r--r-- <span class="number">1</span> root root  <span class="number">400</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">30</span> hello.cc</div><div class="line">-rw-r--r-- <span class="number">1</span> root root  <span class="number">587</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">25</span> Hello.java</div><div class="line">-rw-r--r-- <span class="number">1</span> root root <span class="number">2584</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">42</span> hello.o</div><div class="line">-rwxr-xr-x <span class="number">1</span> root root <span class="number">6720</span> Apr  <span class="number">4</span> <span class="number">09</span>:<span class="number">43</span> libhello.so</div></pre></td></tr></table></figure>
+<p>将libhello.so拷贝到/usr/lib/等待使用。</p>
+<p>至此，被调用方so也已经准备完毕。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@pc jni]# java com.houbin.jni.Hello</div><div class="line">/root/src/StorageManage/:/usr/local/lib:/usr/local/hadoop/lib/native::/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib</div><div class="line">come from c, name is 12345</div></pre></td></tr></table></figure>
+<p>这里只是一个简单的技术验证程序，生产代码要注意对异常的处理。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag">#java</a>
+          
+            <a href="/tags/jni/" rel="tag">#jni</a>
+          
+            <a href="/tags/c/" rel="tag">#c++</a>
+          
+            <a href="/tags/so/" rel="tag">#so</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/02/openstack-keystone安装以及与ceph集成/" rel="next" title="openstack keystone安装以及与ceph集成">
+                <i class="fa fa-chevron-left"></i> openstack keystone安装以及与ceph集成
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/08/keystone验证流程分析/" rel="prev" title="keystone认证流程分析">
+                keystone认证流程分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备工作"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java调用方"><span class="nav-number">2.</span> <span class="nav-text">java调用方</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译java代码"><span class="nav-number">2.1.</span> <span class="nav-text">编译java代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成头文件"><span class="nav-number">2.2.</span> <span class="nav-text">生成头文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#c-实现so"><span class="nav-number">3.</span> <span class="nav-text">c++实现so</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实现java生成头文件中所需的接口"><span class="nav-number">3.1.</span> <span class="nav-text">实现java生成头文件中所需的接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译hello-cc文件为libhello-so"><span class="nav-number">3.2.</span> <span class="nav-text">编译hello.cc文件为libhello.so</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">4.</span> <span class="nav-text">测试</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

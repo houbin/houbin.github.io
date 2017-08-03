@@ -1,0 +1,619 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="HDFS介绍HDFS是基于消费级硬件设计的分布式文件系统。与其他分布式文件系统区别为HDFS专为大文件设计，且具有高容错性。它提供了较少的POSIX接口。它现在是apache hadoop的子项目。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HDFS整体介绍">
+<meta property="og:url" content="http://yoursite.com/2016/03/12/HDFS整体介绍/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="HDFS介绍HDFS是基于消费级硬件设计的分布式文件系统。与其他分布式文件系统区别为HDFS专为大文件设计，且具有高容错性。它提供了较少的POSIX接口。它现在是apache hadoop的子项目。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/hdfs_architecture.gif">
+<meta property="og:image" content="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/hdfs_datanodes_block_replication.gif">
+<meta property="og:updated_time" content="2017-08-03T00:38:34.007Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HDFS整体介绍">
+<meta name="twitter:description" content="HDFS介绍HDFS是基于消费级硬件设计的分布式文件系统。与其他分布式文件系统区别为HDFS专为大文件设计，且具有高容错性。它提供了较少的POSIX接口。它现在是apache hadoop的子项目。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/hdfs_architecture.gif">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/12/HDFS整体介绍/"/>
+
+
+  <title> HDFS整体介绍 | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                HDFS整体介绍
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-12T02:28:43+08:00" content="2016-03-12">
+              2016-03-12
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="HDFS介绍"><a href="#HDFS介绍" class="headerlink" title="HDFS介绍"></a>HDFS介绍</h2><p>HDFS是基于消费级硬件设计的分布式文件系统。与其他分布式文件系统区别为HDFS专为大文件设计，且具有高容错性。它提供了较少的POSIX接口。它现在是apache hadoop的子项目。    </p>
+<a id="more"></a>
+<h2 id="假设和目标"><a href="#假设和目标" class="headerlink" title="假设和目标"></a>假设和目标</h2><ol>
+<li><p>硬件故障<br>硬件故障作为一个常态存在，因此发现故障和快速、自动恢复是HDFS的架构设计目标</p>
+</li>
+<li><p>流数据访问<br>应用程序需要流式的读取数据。HDFS不是通用的存储，它是专门为大文件设计的存储，对于批量的处理比较在行。它的设计目标倾向于高带宽，而非单个数据访问的低延时。POSIX中定义了一些hard requirement，但是这些hard requirement不是HDFS的应用程序所需要的。所以HDFS牺牲了一些POSIX的实现换取了数据读取的高带宽。</p>
+</li>
+<li><p>大块数据集<br>HDFS最终的数据存储是写到一个个大文件上的，这就是HDFS为了达到对于大文件的更优支持而设计的。HDFS支持在单个实例上保存上千万个这样的大文件。</p>
+</li>
+<li><p>简单的一致性模型<br>HDFS的应用需要一个write-once-read-many的文件访问模型。一个文件被created、writen and closed之后就永远不会被changed，这种前提性约束简化了数据的一致性模型，也极大地提高了数据读写的吞吐量。map-reduce的应用程序对于数据的需求也符合write-once-read-many的文件访问模型。</p>
+</li>
+<li><p>计算迁移比数据迁移便宜<br>数据本地化对于计算有很大的便利，这样可以减少数据传输导致的网络压力和延迟。这种思路导出的推论是“把计算移动到数据在的位置” 比 “把数据移动到计算的位置” 有很大的好处。HDFS向应用程序提供将应用程序移的与数据近点的接口。</p>
+</li>
+<li><p>对于各类硬件平台和软件平台的适应性<br>HDFS要设计成能够很方便的在各类平台迁移。</p>
+</li>
+</ol>
+<h2 id="NameNode和DataNodes"><a href="#NameNode和DataNodes" class="headerlink" title="NameNode和DataNodes"></a>NameNode和DataNodes</h2><p>HDFS的NameNode采用了master/slave的架构。一个HDFS集群只有一个NameNode，NameNode负责管理文件系统的namespace，控制客户端对文件的访问。HDFS有多个DataNodes，一般一个节点一个DataNode，用于管理该节点下的所有存储。HDFS向外提供了一个文件系统的namespace，并允许用户数据以文件的形式存储。内部实现中，一个文件会被分成one or more blocks，这些blocks会被存到一个DataNode set中。DataNode就负责处理来自文件系统客户端的读写请求，同时DataNode也处理来自NameNode关于block的creation、deletion和replication。HDFS的数据流图如下<br><img src="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/hdfs_architecture.gif" alt="HDFS数据流图"></p>
+<p>在整个HDFS中，NameNode启动一个仲裁的作用，它提供了同一个namespace，负责整个文件目录树、文件和block的对应关系、block和DataNode的关系。</p>
+<h2 id="文件系统namespace"><a href="#文件系统namespace" class="headerlink" title="文件系统namespace"></a>文件系统namespace</h2><p>HDFS提供了传统文件系统的目录结构，一个用户可以创建一个目录，可以在这个目录中创建文件、删除文件、移动文件到其他目录、重命名文件。HDFS没有实现基于用户的配额，也没有支持soft link、hard link。但是，hdfs不排除会做这些feature。</p>
+<h2 id="数据副本"><a href="#数据副本" class="headerlink" title="数据副本"></a>数据副本</h2><p>HDFS被设计成可靠的跨节点存储大文件，它是以block的形式存储文件；所有的block除了最后一个block都是一样的大小。block会被做副本以防止故障。block的大小和副本数是按文件配置的。应用程序可以指定单个文件的配置。副本数是文件在被create的时候指定，可以在之后被修改。HDFS中的文件是写一次，而且严格的只有一个writer。</p>
+<p>NameNode会定期的收到来自DataNode的heartbeat和Blockreport。heartbeat是用于标识datanode还活着，blockreport包含了一个datanode的block list。block repliaction的数据流图如下<br><img src="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/hdfs_datanodes_block_replication.gif" alt="block replication数据流图"></p>
+<p>如图所示，NameNode对文件进行划分的结构如下<br>/users/sameerp/data/part-0, r:2, {1, 3} …</p>
+<p>1.副本分布<br>HDFS的副本一般为3个（这里说的是全部的数据副本数），分布方式为1个副本在一个node上，另外两个在另外一个机柜上的不同node上。<br>有个推论是由于机柜中节点之间是通过同一交换机连接的，不同机柜之间是两个交换机通过一条线连接，可知同个机柜的带宽是便宜的，而不同机柜之间的带宽是贵的。HDFS的副本写方式是流水式，即a -&gt; b -&gt; c，请求返回是c -&gt; b -&gt; a，这样将后两个副本放在一个机柜上就可以减少机柜之间的带宽压力。</p>
+<p>2.副本读取<br>HDFS读取数据倾向于选择同一机柜上的数据。如果没有同一机柜上的数据，就倾向于选择同一data center的数据</p>
+<p>3.safemode<br>HDFS在启动时NameNode首先进入safemode，这时NameNode没有data block的副本信息。NameNode收到DataNode的heartbeat和blockreport之后，如果block的副本数超过了指定的副本最小数目，则NameNode认为该block是被安全复制的。当被安全复制的副本比例达到指定值外加30s，则NameNode退出safemode。这时，NameNode会将少于指定比例副本数的block拷贝到其他的DataNode上。</p>
+<h2 id="文件元数据的persistence（持久化）"><a href="#文件元数据的persistence（持久化）" class="headerlink" title="文件元数据的persistence（持久化）"></a>文件元数据的persistence（持久化）</h2><p>HDFS的命名空间即所有的元数据存储在NameNode上。NameNode使用一个transaction log（名字为EditLog）持久化保存文件系统元数据的每一个变化，例如，创建文件，改变文件的副本都会在NameNode中插入一条记录。上面说的用一句话就是所有的元数据增量变化存储在EditLog中。<br>元数据的全局即namespace存储在fsimage中，fsimage也使NameNode本地文件系统的一个文件。</p>
+<p>HDFS在内存中保存全部文件系统的一个镜像，当元数据发生变化时，一方面更新内存中的这个全部文件系统的镜像，一方面更新EditLog文件（这个是要确认sync的）。而当前持久化的全部文件系统文件不一定是最新的。<br>HDFS的架构文档中说现在的实现是只有NameNode启动时，才会使用Editlog更新到持久化的fsimage上，之后会采用定时更新fsimage的方法。</p>
+<h2 id="传输协议"><a href="#传输协议" class="headerlink" title="传输协议"></a>传输协议</h2><p>所有的数据通信都是基于tcp的。NameNode侦听配置好的端口，client和datanode通过该端口与namenode通信。所有的通信协议都是通过RPC实现的。</p>
+<h2 id="Robustness"><a href="#Robustness" class="headerlink" title="Robustness"></a>Robustness</h2><p>HDFS的设计目标是在故障成为常态时提供可靠的存储。常见的故障包含NameNode故障、DataNode故障和网络故障。</p>
+<p>1.磁盘故障、心跳和re-replication<br>每一个DataNode都会定时的向NameNode发送心跳。当出现网络故障时，NameNode在一段时间不会收到心跳，则NameNode就会认为该DataNode出现故障，现在就需要重新副本。NameNode总是会检查block是否要re-replication，导致这种情况有如下原因：DataNode失效、副本损坏、磁盘坏掉、文件的副本数发生变化。</p>
+<p>2.cluster重平衡<br>新加NameNode时，重新平衡？</p>
+<p>3.数据一致性<br>客户端在写入文件时，会计算每一个block的checksum，并放到NameNode中。当客户端读取数据时，会计算每个block的数据的checksum，并与NameNode中的checksum进行比对。</p>
+<p>4.元数据磁盘故障<br>fsimage和editlog是HDFS的中心。存放fsimage和editlog的磁盘故障比较要命，所以NameNode需要被配置成fsimage和editlog多副本，这就导致降低元数据的更新速度（sync更新多个editlog文件），但是这个降级是可以接受的，因为HDFS的应用对于元数据不是那么的敏感。</p>
+<h2 id="数据组织"><a href="#数据组织" class="headerlink" title="数据组织"></a>数据组织</h2><p>1.Data block<br>HDFS为大文件设计的，HDFS的应用也是比较大的文件，而且符合write-once-read-many的语义。一个典型的HDFS的块大小为64M，一个文件会被分割成若干个64M的块，每个块会被分配到不同的datanode上。</p>
+<p>2.staging<br>客户端创建文件时，不是向NameNode发送创建文件的消息，而是先将要写的文件存到本地的临时文件。当本地的临时文件达到HDFS的块大小时，客户端便将缓存的发送到NameNode指定的DataNode。当文件关闭时，客户端缓存的数据会flush到DataNode中。客户端这时会告诉NameNode文件已经关闭。这时，NameNode便会将文件创建操作持久化。如果NameNode在文件关闭前挂掉，文件就会丢失。</p>
+<p>3.副本流水线<br>当客户端向HDFS的文件写数据时，客户端从NameNode得到一个DataNode集合，假设该文件的副本数是3。客户端将数据发送到第一个DataNode，然后DataNode以4K大小接收到数据，然后将数据写到它的数据仓库中（现在是弄文件系统），在写入数据仓库的同时，数据发送到第二个DataNode，第二个DataNode的行为与第一个DataNode一样。</p>
+<h2 id="访问"><a href="#访问" class="headerlink" title="访问"></a>访问</h2><p>HDFS提供了许多形式的访问方式。方法1是HDFS提供了一套JAVA的api；方法2是提供了一套c接口；方法3是可以通过http浏览器查看HDFS的文件。</p>
+<p>1.FS shell<br>HDFS允许用户的数据以文件和目录的形式组织。HDFS提供了一套命令集合，可以通过命令以类似文件系统操作的形式操作HDFS系统。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">创建一个/foodir的目录 		bin/hadoop dfs -mkdir /foodir</div><div class="line">删除一个/foodir的目录		bin/hadoop dfs -rmr /foodir</div><div class="line">查看一个/foodir的目录		bin/haddop dfs -cat /foodir/myfile.txt</div></pre></td></tr></table></figure>
+<p>2.HDFS管理<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">集群进入safemode			bin/hadoop dfsadmin -safemode enter</div><div class="line">生成DataNode的列表 		bin/hadoop dfsadmin -report</div><div class="line">增加DataNode				bin/hadoop dfsadmin -refreshNodes</div></pre></td></tr></table></figure></p>
+<p>3.浏览器接口<br>HDFS提供了一个web server，这个web server绑定一个可配置的tcp port。</p>
+<h2 id="空间回收"><a href="#空间回收" class="headerlink" title="空间回收"></a>空间回收</h2><p>1.文件删除与去删除<br>当HDFS中删除一个文件时，文件会被重命名到/trash目录，所以文件可以被恢复，当且仅当它还在/trash目录中。/trash目录中的文件的生命期是6个小时。所以从文件被删除，到HDFS的系统空间增大会有一个延时。</p>
+<p>2.减少副本数量<br>例如现在副本数量为3，将副本数量设置为2。在下一次心跳时，会将该信息传输给DataNode，这样DataNode就会删除对应的block。所以从减少副本数量到HDFS容量变化也会有一个延迟。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/03/值语义/" rel="next" title="值语义">
+                <i class="fa fa-chevron-left"></i> 值语义
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/15/使用ceph-deploy创建ceph集群/" rel="prev" title="使用ceph-deploy创建ceph集群">
+                使用ceph-deploy创建ceph集群 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#HDFS介绍"><span class="nav-number">1.</span> <span class="nav-text">HDFS介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#假设和目标"><span class="nav-number">2.</span> <span class="nav-text">假设和目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NameNode和DataNodes"><span class="nav-number">3.</span> <span class="nav-text">NameNode和DataNodes</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件系统namespace"><span class="nav-number">4.</span> <span class="nav-text">文件系统namespace</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据副本"><span class="nav-number">5.</span> <span class="nav-text">数据副本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文件元数据的persistence（持久化）"><span class="nav-number">6.</span> <span class="nav-text">文件元数据的persistence（持久化）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传输协议"><span class="nav-number">7.</span> <span class="nav-text">传输协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Robustness"><span class="nav-number">8.</span> <span class="nav-text">Robustness</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据组织"><span class="nav-number">9.</span> <span class="nav-text">数据组织</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问"><span class="nav-number">10.</span> <span class="nav-text">访问</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#空间回收"><span class="nav-number">11.</span> <span class="nav-text">空间回收</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

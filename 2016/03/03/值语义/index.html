@@ -1,0 +1,615 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="本文参考陈硕大神编写的C++ 工程实践(8)：值语义,只为了自己做个笔记。 什么是值语义值语义（value sematics）指的是对象的拷贝与原对象无关，即在内存中是两块不同的内存，各操作各的，如c++内置类型int、double，标准库的vector&amp;lt;&amp;gt;、map&amp;lt;&amp;gt;、string等类型，jave语言的primitive types也是值语义 与值语义对应的就是对象语义（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="值语义">
+<meta property="og:url" content="http://yoursite.com/2016/03/03/值语义/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="本文参考陈硕大神编写的C++ 工程实践(8)：值语义,只为了自己做个笔记。 什么是值语义值语义（value sematics）指的是对象的拷贝与原对象无关，即在内存中是两块不同的内存，各操作各的，如c++内置类型int、double，标准库的vector&amp;lt;&amp;gt;、map&amp;lt;&amp;gt;、string等类型，jave语言的primitive types也是值语义 与值语义对应的就是对象语义（">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/%E5%80%BC%E8%AF%AD%E4%B9%89C%2B%2B%E5%86%85%E5%AD%98layout.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/%E5%80%BC%E8%AF%AD%E4%B9%89Java%E5%86%85%E5%AD%98layout.png">
+<meta property="og:updated_time" content="2017-08-03T00:38:34.008Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="值语义">
+<meta name="twitter:description" content="本文参考陈硕大神编写的C++ 工程实践(8)：值语义,只为了自己做个笔记。 什么是值语义值语义（value sematics）指的是对象的拷贝与原对象无关，即在内存中是两块不同的内存，各操作各的，如c++内置类型int、double，标准库的vector&amp;lt;&amp;gt;、map&amp;lt;&amp;gt;、string等类型，jave语言的primitive types也是值语义 与值语义对应的就是对象语义（">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/%E5%80%BC%E8%AF%AD%E4%B9%89C%2B%2B%E5%86%85%E5%AD%98layout.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/03/值语义/"/>
+
+
+  <title> 值语义 | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                值语义
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-03T18:00:17+08:00" content="2016-03-03">
+              2016-03-03
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文参考陈硕大神编写的<a href="http://www.cnblogs.com/Solstice/archive/2011/08/16/2141515.html" target="_blank" rel="external">C++ 工程实践(8)：值语义</a>,只为了自己做个笔记。</p>
+<h2 id="什么是值语义"><a href="#什么是值语义" class="headerlink" title="什么是值语义"></a>什么是值语义</h2><p>值语义（value sematics）指的是对象的拷贝与原对象无关，即在内存中是两块不同的内存，各操作各的，如c++内置类型int、double，标准库的vector&lt;&gt;、map&lt;&gt;、string等类型，jave语言的primitive types也是值语义</p>
+<p>与值语义对应的就是对象语义（object sematics），也叫引用语义（reference sematics）。这里的引用与c++代码中引用不是一回事，下面使用对象语义来说明。<br>对象语义指的是面向对象意义下的对象，对象拷贝是禁止的。例如muduo中的Thread是对象语义，因为即使把Thread拷贝出来，也不能让系统增加一个一模一样的线程。<br>同样的道理，拷贝一个Employee对象也是没有意义的，一个雇员不能变成两个雇员。拷贝TcpConnection对象也是没有意义的，拷贝tcp连接不能使系统多出一个tcp连接。总之，面向对象语义下的对象是noncopyable的。</p>
+<p>Java中所有的class对象都是对象语义，所以下面代码a和b指向的是同一个ArrayList对象，修改a就会影响b，修改b也会影响a</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ArrayList&lt;Integer&gt; a = <span class="keyword">new</span> ArrayList&lt;Integer&gt;(); </div><div class="line">ArrayList&lt;Integer&gt; b = a;</div></pre></td></tr></table></figure>
+<p>值语义与immutable无关。java有value object一说，按(PoEAA 486)的定义，它实际上是immutable object，例如String、Integer、BigInteger、joda.time.DataTime等等（因为java无法实现值语义class，只好用immutable object来模拟）。muduo中的Date、TimeStamp也是immutable的，它们继承了boost::copyable，而且没有成员函数可以修改内部成员。</p>
+<h2 id="值语义与生命周期"><a href="#值语义与生命周期" class="headerlink" title="值语义与生命周期"></a>值语义与生命周期</h2><p>值语义的最大好处是生命期管理简单，就跟int一样，不用关心int的生命期。值语义的对象要么是stack object，或者是其他object的数据成员，因此不用担心它的生命期管理。相反，对象语义的object由于不能拷贝，我们只能通过指针或引用来使用它，这是c++程序产生bug的一大来源。此外，C++只能使用指针和引用来实现多态，那么C++里从事基于继承和多态的面向对象编程有其本质的困难—资源管理。</p>
+<p>考虑一个对象建模—家长和子女。a parent has a child, and a child knows his/her parent。在java中很好写，不用担心内存泄露，也不用担心空悬指针。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Parent</span></span></div><div class="line"><span class="class"></span>&#123;</div><div class="line">	<span class="keyword">private</span> Child my_child;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Child</span></span></div><div class="line"><span class="class"></span>&#123;</div><div class="line">	<span class="keyword">private</span> Parent my_parent;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>只要正确初始化my_child和my_parent，那么java程序员就不用担心出现访问错误。一个handle是否有效，只需要判断是否non null即可。</p>
+<p>C++中就要为资源管理费脑筋了：Parent和Child都代表的是真人，肯定不能拷贝，因此具有对象语义。Parent是直接持有Child吗？抑或Parent和Child互指？Child的生命期由Parent控制吗？如果还有ParentClub和School两个class，分别代表家长俱乐部和学校：ParentClub has many Parents，School has many Child(ren)，那么如何保证它们始终持有有效的Parent对象和Child对象？何时才能安全的释放Parent和Child?<br>直接但是易错的写法是：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span>;</span> <span class="comment">// 前向声明</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">private</span>:</div><div class="line">	Child *child_;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">private</span>:</div><div class="line">	Parent parent_;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>如果直接使用指针作为成员，如何保证指针的有效性？如何防止悬空指针（被释放后的指针）？Child和Parent由谁负责释放？在释放某个Parent对象时，如何保证程序中没有指向它的指针？在释放Child时，如何保证程序中没有指向它的指针？</p>
+<p>这些问题是个麻烦事，不过可以使用smart_ptr把对象语义转化为值语义，从而解决对象生命期：让Parent持有Child的smart pointer，同时让Child持有Parent的smart pointer，这样始终引用对方的时候就不会担心出现悬空指针，当然，其中的一个必须为weak reference，否则就会出现循环引用，出现资源的无法释放问题。如下面例子</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span>;</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="built_in">shared_ptr</span>&lt;B&gt; m_b_;</div><div class="line">&#125;;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="built_in">shared_ptr</span>&lt;A&gt; m_a_;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">	&#123;</div><div class="line">		<span class="built_in">shared_ptr</span>&lt;A&gt; a(<span class="keyword">new</span> A); <span class="comment">// new出来A的引用计数为1</span></div><div class="line">		<span class="built_in">shared_ptr</span>&lt;B&gt; b(<span class="keyword">new</span> B); <span class="comment">// new出来B的引用计数为1</span></div><div class="line">		a-&gt;m_b_ = b;            <span class="comment">// new出来B的引用计数为2</span></div><div class="line">		b-&gt;m_a_ = a;            <span class="comment">// new出来A的引用计数为2</span></div><div class="line">	&#125;</div><div class="line">	<span class="comment">// b先离开作用域时，由于a中有b的shared_ptr，那么b的引用计数1，导致b中m_a_不会被析构，所以new出来a的引用计数为2</span></div><div class="line">	<span class="comment">// a后离开作用域，a的引用计数减为1，所以a中的m_b_不会被析构，new出来的b的引用计数仍然为1</span></div><div class="line">	<span class="comment">// 这样就导致了无法释放a和b，产生了内存泄露</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>回到解决Parent和Child生命期的问题，所以Parent和Child两个不能同时包含对方的shared_ptr，一方需要包含对方的weak reference。到底哪一方是weak reference，则取决于具体应用场景。</p>
+<p>如果Parent拥有Child，Child的生命期由其Parent控制，Child的生命期小于Parent，那么代码如下：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span>;</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	explicit Child(Parent *my_parent):my_parent_(my_parent)</div><div class="line">	&#123;&#125;</div><div class="line"><span class="keyword">private</span>:</div><div class="line">	Parent *my_parent_;</div><div class="line">&#125;;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	Parent():my_child_(<span class="keyword">new</span> Child(<span class="keyword">this</span>))</div><div class="line">	&#123;&#125;</div><div class="line"><span class="keyword">private</span>:</div><div class="line">	boost::scope_ptr&lt;child&gt; my_child_;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>在上面代码中，child的指针不能泄露给其他人，否则可能会出现new出来的parent被释放，但是child没有释放的场景，导致child中的my<em>parent</em>指针是个悬空指针（相当危险）。</p>
+<p>如果Parent和Child的生命期相对独立，就要麻烦一些，代码如下<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span>;</span></div><div class="line"><span class="keyword">typedef</span> <span class="built_in">shared_ptr</span>&lt;Parent&gt; ParentPtr;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span>:</span>boost::noncopyable</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">	Child(<span class="keyword">const</span> ParentPtr &amp;my_parent):my_parent_(my_parent)</div><div class="line">	&#123;&#125;</div><div class="line"><span class="keyword">private</span>:</div><div class="line">	boost::weak_ptr&lt;Parent&gt; my_parent_;</div><div class="line">&#125;;</div><div class="line"><span class="keyword">typedef</span> <span class="built_in">shared_ptr</span>&lt;Child&gt; ChildPtr;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Parent</span> :</span> <span class="keyword">public</span> boost::enable_shared_from_this&lt;Parent&gt;, <span class="keyword">private</span> boost::noncopyable</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">	Parent()</div><div class="line">	&#123;&#125;</div><div class="line">	<span class="function"><span class="keyword">void</span> <span class="title">AddChild</span><span class="params">()</span></span></div><div class="line"><span class="function">	</span>&#123;</div><div class="line">		my_child.reset(<span class="keyword">new</span> Child(shared_from_this()));</div><div class="line">	&#125;</div><div class="line"><span class="keyword">private</span>:</div><div class="line">	ChildPtr my_child_;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>考虑一个稍微复杂一点的对象模型：a child has parents: mom and dad; a parent has one or more children；a parent knows his/her spouse<br>使用java比较的简单，垃圾收集会帮我们搞定对象生命期<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Child</span></span></div><div class="line"><span class="class"></span>&#123;</div><div class="line"><span class="keyword">private</span> Parent mom;</div><div class="line"><span class="keyword">private</span> Parent dad;</div><div class="line">&#125;;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Parent</span></span></div><div class="line"><span class="class"></span>&#123;</div><div class="line"><span class="keyword">private</span> Parent spouse;</div><div class="line"><span class="keyword">private</span> ArrayList&lt;Child&gt; children;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>使用c++来实现，如何避免出现悬空指针，同时避免出现内存泄露？借助shared_ptr把裸指针转换为值语义就可以了<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span>;</span></div><div class="line"><span class="keyword">typedef</span> <span class="built_in">shared_ptr</span>&lt;Parent&gt; ParentPtr;</div><div class="line"><span class="keyword">typedef</span> <span class="built_in">shared_ptr</span>&lt;Child&gt; ChildPtr;</div><div class="line">clas Parent</div><div class="line">&#123;</div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="function"><span class="keyword">void</span> <span class="title">SetSpouse</span><span class="params">(<span class="keyword">const</span> ParentPtr &amp;spouse)</span></span></div><div class="line"><span class="function">	</span>&#123; spouse_ = spouse; &#125;</div><div class="line">	<span class="function"><span class="keyword">void</span> <span class="title">AddChild</span><span class="params">(<span class="keyword">const</span> ChildPtr &amp;child)</span></span></div><div class="line"><span class="function">	</span>&#123; children_.push_back(child); &#125;</div><div class="line"><span class="keyword">private</span>:</div><div class="line">	weak_ptr&lt;Parent&gt; spouse_;</div><div class="line">	ArrayList&lt;ChildPtr&gt; children_;</div><div class="line">&#125;;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Child</span></span></div><div class="line"><span class="class">&#123;</span></div><div class="line"><span class="keyword">public</span>:</div><div class="line">	<span class="function"><span class="keyword">explicit</span> <span class="title">Child</span><span class="params">(<span class="keyword">const</span> ParentPtr &amp;mom, <span class="keyword">const</span> ParentPtr &amp;dad)</span></span></div><div class="line">	: mom_(mom), dad_(dad)</div><div class="line">	&#123;&#125;</div><div class="line"><span class="keyword">private</span>:</div><div class="line">	weak_ptr&lt;Parent&gt; mom_;</div><div class="line">	weak_ptr&lt;Parent&gt; dad_;</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">	<span class="function">ParentPtr <span class="title">mom</span><span class="params">(<span class="keyword">new</span> Parent)</span></span>;</div><div class="line">	<span class="function">ParentPtr <span class="title">dad</span><span class="params">(<span class="keyword">new</span> Parent)</span></span>;</div><div class="line">	mon-&gt;SetSpouse(dad);</div><div class="line">	dad-&gt;SetSpouse(mom);</div><div class="line">	</div><div class="line">	&#123;</div><div class="line">		ChildPtr a(new Child(mom, dad));</div><div class="line">		mom-&gt;AddChild(a);</div><div class="line">		dad-&gt;AddChild(a);</div><div class="line">	&#125;</div><div class="line">	&#123;</div><div class="line">		ChildPtr b(new Child(mom, dad));</div><div class="line">		mom-&gt;AddChild(a);</div><div class="line">		dad-&gt;AddChild(b);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="值语义与标准库"><a href="#值语义与标准库" class="headerlink" title="值语义与标准库"></a>值语义与标准库</h2><p>C++要求凡事能够放到标准容器的类型必须具有值语义。准确的说，type必须是SGIAssignable concept的model（不太明白）。但是由于C++编译器总是为class生成默认的拷贝构造函数、复制构造函数，因此除非明令禁止，否则class总是可以作为标准库的元素类型，尽管程序可以编译，但是会产生资源管理方面的bug。</p>
+<p>因此，在写一个class的时候，先让它继承boost::noncopyable，几乎总是正确的。</p>
+<p>在现代C++中，一般不需要自己编写copy constructor和assignment constructor，因为只要每个数据成员都具有值语义，编译器自动生成的member-bise copying&amp;assigning就能正常工作；如果以smart ptr为成员来持有其他对象，那么就能自动启动或禁止copying&amp;assigning。例如：编写HashMap这类底层库时，还是需要自己实现copy control。</p>
+<h3 id="值语义与C-语言"><a href="#值语义与C-语言" class="headerlink" title="值语义与C++语言"></a>值语义与C++语言</h3><p>C++的class本质是值语义的，这才会出现object slicing(对象切割的问题下一篇介绍)这种语言独有的问题，也会需要程序员注意pass-by-value和pass-by-reference的取舍。</p>
+<p>值语义是C++语言的三大约束之一。C++的设计初衷是让用户定义的类型（class）能像内置类型（int）一样工作，具有同等地位，为此，C++做了如下的设计（妥协）</p>
+<pre><code>- class的layout与C struct一样，没有任何的开销。定义一个只包含int类型成员的class的对象开销和定义一个int一样。
+- class的数据成员是uninitialized，因为函数的局部int变量也是uninitialized。
+- class可以在stack上创建，也可以在heap上创建。因为int是stack variable
+- class的数组就是一个个class对象挨着，没有额外的indirection。因为int数组就是这样的。
+- 编译器会为class默认生成copy constructor和assignment operator，其他语言没有copy constructor一说，也不允许重载assignment operator，c++的对象默认是可以拷贝的。java的class对象是对象语义，不能被拷贝。
+- 当class type作为参数传入时，默认是make a copy（除非参数声明为reference）。因为把int传入参数时是make a copy。
+- 当函数返回一个class type时，只能通过make a copy（C++不得不定义RVO来解决性能问题？）。因为函数返回int时就是make a copy。
+- 以class type为成员时，数据成员时嵌入的。例如pair&lt;complex&lt;double&gt; &gt;, size_t&gt;的layout就是complex&lt;double&gt;挨着size_t
+</code></pre><p>如上的设计带来了性能上的好处，原因是memory locality？。比方说我们在C++中定义complex<double> class，array of complex<double>, vector<complex<double> &gt;，它们的layout分别是：（re和im分别是负数的实部和虚部）</complex<double></double></double></p>
+<p><img src="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/%E5%80%BC%E8%AF%AD%E4%B9%89C%2B%2B%E5%86%85%E5%AD%98layout.png" alt="C++内存layout"></p>
+<p>而java的内存layout如下图：<br><img src="https://raw.githubusercontent.com/houbin/MarkdownPhotos/master/res/%E5%80%BC%E8%AF%AD%E4%B9%89Java%E5%86%85%E5%AD%98layout.png" alt="java内存layout"></p>
+<p>通过对比可知，C++的对象模型紧凑的多。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/29/gdb调试动态链接库/" rel="next" title="gdb调试动态链接库">
+                <i class="fa fa-chevron-left"></i> gdb调试动态链接库
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/12/HDFS整体介绍/" rel="prev" title="HDFS整体介绍">
+                HDFS整体介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是值语义"><span class="nav-number">1.</span> <span class="nav-text">什么是值语义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#值语义与生命周期"><span class="nav-number">2.</span> <span class="nav-text">值语义与生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#值语义与标准库"><span class="nav-number">3.</span> <span class="nav-text">值语义与标准库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#值语义与C-语言"><span class="nav-number">3.1.</span> <span class="nav-text">值语义与C++语言</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

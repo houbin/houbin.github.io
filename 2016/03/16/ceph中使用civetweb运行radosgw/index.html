@@ -1,0 +1,603 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ceph radosgw civetweb," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="ceph中使用civetweb运行radosgw此文章是参考下面两个文章所写，如要追溯求源，请直接查看下面两个连接内容。有云Ceph课堂：使用CivetWeb快速搭建RGWRun ceph radosgw with civetweb ceph从firefly开始支持使用civetweb作为radosgw的前端web协议引擎，相对于之前的使用apache，安装更加的方便，">
+<meta name="keywords" content="ceph radosgw civetweb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ceph中使用civetweb运行radosgw">
+<meta property="og:url" content="http://yoursite.com/2016/03/16/ceph中使用civetweb运行radosgw/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="ceph中使用civetweb运行radosgw此文章是参考下面两个文章所写，如要追溯求源，请直接查看下面两个连接内容。有云Ceph课堂：使用CivetWeb快速搭建RGWRun ceph radosgw with civetweb ceph从firefly开始支持使用civetweb作为radosgw的前端web协议引擎，相对于之前的使用apache，安装更加的方便，">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-03T00:38:34.008Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ceph中使用civetweb运行radosgw">
+<meta name="twitter:description" content="ceph中使用civetweb运行radosgw此文章是参考下面两个文章所写，如要追溯求源，请直接查看下面两个连接内容。有云Ceph课堂：使用CivetWeb快速搭建RGWRun ceph radosgw with civetweb ceph从firefly开始支持使用civetweb作为radosgw的前端web协议引擎，相对于之前的使用apache，安装更加的方便，">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/16/ceph中使用civetweb运行radosgw/"/>
+
+
+  <title> ceph中使用civetweb运行radosgw | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ceph中使用civetweb运行radosgw
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-16T17:45:37+08:00" content="2016-03-16">
+              2016-03-16
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="ceph中使用civetweb运行radosgw"><a href="#ceph中使用civetweb运行radosgw" class="headerlink" title="ceph中使用civetweb运行radosgw"></a>ceph中使用civetweb运行radosgw</h2><p>此文章是参考下面两个文章所写，如要追溯求源，请直接查看下面两个连接内容。<br><a href="https://www.ustack.com/blog/civetweb/" target="_blank" rel="external">有云Ceph课堂：使用CivetWeb快速搭建RGW</a><br><a href="http://hustcat.github.io/run-ceph-radosgw-with-civetweb/" target="_blank" rel="external">Run ceph radosgw with civetweb</a></p>
+<p>ceph从firefly开始支持使用civetweb作为radosgw的前端web协议引擎，相对于之前的使用apache，安装更加的方便，</p>
+<a id="more"></a>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><ul>
+<li>ceph集群系统</li>
+<li>ceph集群已经创建rgw pool</li>
+<li>需要运行radosgw的机器已经安装radosgw</li>
+</ul>
+<h2 id="创建RGW需要使用的存储池"><a href="#创建RGW需要使用的存储池" class="headerlink" title="创建RGW需要使用的存储池"></a>创建RGW需要使用的存储池</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">ceph osd pool create .rgw 64 64</div><div class="line">ceph osd pool create .rgw.root 64 64</div><div class="line">ceph osd pool create .rgw.control 64 64</div><div class="line">ceph osd pool create .rgw.gc 64 64</div><div class="line">ceph osd pool create .rgw.buckets 64 64</div><div class="line">ceph osd pool create .rgw.buckets.index 64 64</div><div class="line">ceph osd pool create .log 64 64</div><div class="line">ceph osd pool create .intent-log 64 64</div><div class="line">ceph osd pool create .usage 64 64</div><div class="line">ceph osd pool create .users 64 64</div><div class="line">ceph osd pool create .users.email 64 64</div><div class="line">ceph osd pool create .users.swift 64 64</div><div class="line">ceph osd pool create .users.uid 64 64</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">[root@pc ceph-deploy]# rados lspools</div><div class="line">rbd</div><div class="line">.rgw</div><div class="line">.rgw.root</div><div class="line">.rgw.control</div><div class="line">.rgw.gc</div><div class="line">.rgw.buckets</div><div class="line">.rgw.buckets.index</div><div class="line">.log</div><div class="line">.intent-log</div><div class="line">.usage</div><div class="line">.users</div><div class="line">.users.email</div><div class="line">.users.swift</div><div class="line">.users.uid</div></pre></td></tr></table></figure>
+<h2 id="在ceph集群中创建user和keyring"><a href="#在ceph集群中创建user和keyring" class="headerlink" title="在ceph集群中创建user和keyring"></a>在ceph集群中创建user和keyring</h2><p>1.创建RGW用户houbin对应的keyring文件<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># ceph-authtool --create-keyring /etc/ceph/ceph.client.houbin.keyring</span></div><div class="line">creating /etc/ceph/ceph.client.houbin.keyring</div></pre></td></tr></table></figure></p>
+<p>2.在keyring文件中产生对应的key<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># ceph-authtool /etc/ceph/ceph.client.houbin.keyring -n client.houbin.gateway --gen-key</span></div><div class="line">[root@inspur44 ~]<span class="comment"># cat /etc/ceph/ceph.client.houbin.keyring </span></div><div class="line">[client.houbin.gateway]</div><div class="line">	key = AQDwa+tW+FsqCRAA1aC7AN6bxfjuE2CuceEYjA==</div></pre></td></tr></table></figure></p>
+<p>3.keyring添加权限信息<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># ceph-authtool -n client.houbin.gateway --cap osd 'allow rwx' --cap mon 'allow rwx' /etc/ceph/ceph.client.houbin.keyring </span></div><div class="line">[root@inspur44 ~]<span class="comment"># cat /etc/ceph/ceph.client.houbin.keyring </span></div><div class="line">[client.houbin.gateway]</div><div class="line">	key = AQDwa+tW+FsqCRAA1aC7AN6bxfjuE2CuceEYjA==</div><div class="line">	caps mon = <span class="string">"allow rwx"</span></div><div class="line">	caps osd = <span class="string">"allow rwx"</span></div></pre></td></tr></table></figure></p>
+<p>4.将key添加到集群中<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># ceph -k /etc/ceph/ceph.client.admin.keyring auth add client.houbin.gateway -i /etc/ceph/ceph.client.houbin.keyring </span></div><div class="line">added key <span class="keyword">for</span> client.houbin.gateway</div></pre></td></tr></table></figure></p>
+<p>至此，已经在ceph集群中创建了RGW用户houbin对应的keyring文件，生成了key，添加了权限信息，并已经将key添加到ceph集群之中。</p>
+<h2 id="radosgw节点配置"><a href="#radosgw节点配置" class="headerlink" title="radosgw节点配置"></a>radosgw节点配置</h2><p>将ceph集群中/etc/ceph/ceph.conf和/etc/ceph/ceph.client.houbin.keyring文件拷贝到radosgw节点的/etc/ceph目录下，下面的配置便是在radosgw上进行配置。</p>
+<p>配置/etc/ceph/ceph.conf文件如下<br><figure class="highlight powershell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># cat /etc/ceph/ceph.conf </span></div><div class="line">[global]</div><div class="line">auth_service_required = cephx</div><div class="line">filestore_xattr_use_omap = true</div><div class="line">auth_client_required = cephx</div><div class="line">auth_cluster_required = cephx</div><div class="line">mon_host = <span class="number">192.168</span>.<span class="number">1.43</span></div><div class="line">mon_initial_members = inspur43</div><div class="line">fsid = <span class="number">44</span>f44941-<span class="number">6</span>cb6-<span class="number">463</span>e-<span class="number">8</span>f73-<span class="number">01949</span>ec3a703</div><div class="line"></div><div class="line">[client.houbin.gateway]</div><div class="line">    host=inspur44</div><div class="line">    keyring=/etc/ceph/ceph.client.houbin.keyring</div><div class="line">    rgw_socket_path=/tmp/radosgw_houbin.sock</div><div class="line">    log_file=/var/log/radosgw/radosgw_houbin.log</div><div class="line">    rgw frontends=<span class="string">"civetweb port=80"</span></div></pre></td></tr></table></figure></p>
+<p>其中，keyring文件便是在ceph集群中添加并生成的文件</p>
+<h2 id="运行radosgw"><a href="#运行radosgw" class="headerlink" title="运行radosgw"></a>运行radosgw</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># radosgw -c /etc/ceph/ceph.conf -n client.houbin.gateway</span></div><div class="line">2016-03-18 10:59:56.219240 7ff3bef24840 -1 WARNING: libcurl doesn<span class="string">'t support curl_multi_wait()</span></div><div class="line"><span class="string">2016-03-18 10:59:56.219243 7ff3bef24840 -1 WARNING: cross zone / region transfer performance may be affected</span></div><div class="line"><span class="string">[root@inspur44 ~]# radosgw -c /etc/ceph/ceph.conf --keyring=/etc/ceph/ceph.client.houbin.keyring --id=houbin.gateway</span></div><div class="line"><span class="string">2016-03-18 11:01:54.364475 7f3318bfb840 -1 WARNING: libcurl doesn'</span>t support curl_multi_wait()</div><div class="line">2016-03-18 11:01:54.364477 7f3318bfb840 -1 WARNING: cross zone / region transfer performance may be affected</div></pre></td></tr></table></figure>
+<h2 id="使用radosgw"><a href="#使用radosgw" class="headerlink" title="使用radosgw"></a>使用radosgw</h2><p>1.创建s3用户<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># radosgw-admin user create --uid=user1 --display-name="user1"</span></div><div class="line">&#123; <span class="string">"user_id"</span>: <span class="string">"user1"</span>,</div><div class="line">  <span class="string">"display_name"</span>: <span class="string">"user1"</span>,</div><div class="line">  <span class="string">"email"</span>: <span class="string">""</span>,</div><div class="line">  <span class="string">"suspended"</span>: 0,</div><div class="line">  <span class="string">"max_buckets"</span>: 1000,</div><div class="line">  <span class="string">"auid"</span>: 0,</div><div class="line">  <span class="string">"subusers"</span>: [],</div><div class="line">  <span class="string">"keys"</span>: [</div><div class="line">        &#123; <span class="string">"user"</span>: <span class="string">"user1"</span>,</div><div class="line">          <span class="string">"access_key"</span>: <span class="string">"B6AUUDRNEY4ND3LN9ERP"</span>,</div><div class="line">          <span class="string">"secret_key"</span>: <span class="string">"wHVjfeSIfuJydlg4\/DD0OIE9JUm7RAfi82tbaVuo"</span>&#125;],</div><div class="line">  <span class="string">"swift_keys"</span>: [],</div><div class="line">  <span class="string">"caps"</span>: [],</div><div class="line">  <span class="string">"op_mask"</span>: <span class="string">"read, write, delete"</span>,</div><div class="line">  <span class="string">"default_placement"</span>: <span class="string">""</span>,</div><div class="line">  <span class="string">"placement_tags"</span>: [],</div><div class="line">  <span class="string">"bucket_quota"</span>: &#123; <span class="string">"enabled"</span>: <span class="literal">false</span>,</div><div class="line">      <span class="string">"max_size_kb"</span>: -1,</div><div class="line">      <span class="string">"max_objects"</span>: -1&#125;,</div><div class="line">  <span class="string">"user_quota"</span>: &#123; <span class="string">"enabled"</span>: <span class="literal">false</span>,</div><div class="line">      <span class="string">"max_size_kb"</span>: -1,</div><div class="line">      <span class="string">"max_objects"</span>: -1&#125;,</div><div class="line">  <span class="string">"temp_url_keys"</span>: []&#125;</div></pre></td></tr></table></figure></p>
+<p>2.创建swift用户<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># radosgw-admin subuser create --uid=user1 --subuser=user1:swift --access=full</span></div><div class="line">&#123; <span class="string">"user_id"</span>: <span class="string">"user1"</span>,</div><div class="line">  <span class="string">"display_name"</span>: <span class="string">"user1"</span>,</div><div class="line">  <span class="string">"email"</span>: <span class="string">""</span>,</div><div class="line">  <span class="string">"suspended"</span>: 0,</div><div class="line">  <span class="string">"max_buckets"</span>: 1000,</div><div class="line">  <span class="string">"auid"</span>: 0,</div><div class="line">  <span class="string">"subusers"</span>: [</div><div class="line">        &#123; <span class="string">"id"</span>: <span class="string">"user1:swift"</span>,</div><div class="line">          <span class="string">"permissions"</span>: <span class="string">"&lt;none&gt;"</span>&#125;],</div><div class="line">  <span class="string">"keys"</span>: [</div><div class="line">        &#123; <span class="string">"user"</span>: <span class="string">"user1"</span>,</div><div class="line">          <span class="string">"access_key"</span>: <span class="string">"B6AUUDRNEY4ND3LN9ERP"</span>,</div><div class="line">          <span class="string">"secret_key"</span>: <span class="string">"wHVjfeSIfuJydlg4\/DD0OIE9JUm7RAfi82tbaVuo"</span>&#125;,</div><div class="line">        &#123; <span class="string">"user"</span>: <span class="string">"user1:swift"</span>,</div><div class="line">          <span class="string">"access_key"</span>: <span class="string">"WVZQIOO7VRIFKN27W329"</span>,</div><div class="line">          <span class="string">"secret_key"</span>: <span class="string">""</span>&#125;],</div><div class="line">  <span class="string">"swift_keys"</span>: [],</div><div class="line">  <span class="string">"caps"</span>: [],</div><div class="line">  <span class="string">"op_mask"</span>: <span class="string">"read, write, delete"</span>,</div><div class="line">  <span class="string">"default_placement"</span>: <span class="string">""</span>,</div><div class="line">  <span class="string">"placement_tags"</span>: [],</div><div class="line">  <span class="string">"bucket_quota"</span>: &#123; <span class="string">"enabled"</span>: <span class="literal">false</span>,</div><div class="line">      <span class="string">"max_size_kb"</span>: -1,</div><div class="line">      <span class="string">"max_objects"</span>: -1&#125;,</div><div class="line">  <span class="string">"user_quota"</span>: &#123; <span class="string">"enabled"</span>: <span class="literal">false</span>,</div><div class="line">      <span class="string">"max_size_kb"</span>: -1,</div><div class="line">      <span class="string">"max_objects"</span>: -1&#125;,</div><div class="line">  <span class="string">"temp_url_keys"</span>: []&#125;</div></pre></td></tr></table></figure></p>
+<p>3.对swift用户生成swift secret key<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">[root@inspur44 ~]<span class="comment"># radosgw-admin key create --subuser=user1:swift --key-type=swift --gen-secret</span></div><div class="line">&#123; <span class="string">"user_id"</span>: <span class="string">"user1"</span>,</div><div class="line">  <span class="string">"display_name"</span>: <span class="string">"user1"</span>,</div><div class="line">  <span class="string">"email"</span>: <span class="string">""</span>,</div><div class="line">  <span class="string">"suspended"</span>: 0,</div><div class="line">  <span class="string">"max_buckets"</span>: 1000,</div><div class="line">  <span class="string">"auid"</span>: 0,</div><div class="line">  <span class="string">"subusers"</span>: [</div><div class="line">        &#123; <span class="string">"id"</span>: <span class="string">"user1:swift"</span>,</div><div class="line">          <span class="string">"permissions"</span>: <span class="string">"&lt;none&gt;"</span>&#125;],</div><div class="line">  <span class="string">"keys"</span>: [</div><div class="line">        &#123; <span class="string">"user"</span>: <span class="string">"user1"</span>,</div><div class="line">          <span class="string">"access_key"</span>: <span class="string">"B6AUUDRNEY4ND3LN9ERP"</span>,</div><div class="line">          <span class="string">"secret_key"</span>: <span class="string">"wHVjfeSIfuJydlg4\/DD0OIE9JUm7RAfi82tbaVuo"</span>&#125;,</div><div class="line">        &#123; <span class="string">"user"</span>: <span class="string">"user1:swift"</span>,</div><div class="line">          <span class="string">"access_key"</span>: <span class="string">"WVZQIOO7VRIFKN27W329"</span>,</div><div class="line">          <span class="string">"secret_key"</span>: <span class="string">""</span>&#125;],</div><div class="line">  <span class="string">"swift_keys"</span>: [</div><div class="line">        &#123; <span class="string">"user"</span>: <span class="string">"user1:swift"</span>,</div><div class="line">          <span class="string">"secret_key"</span>: <span class="string">"NKW36XGgTfxzyLavg72r7eYddg1wtuqP3Tt4ZSow"</span>&#125;],</div><div class="line">  <span class="string">"caps"</span>: [],</div><div class="line">  <span class="string">"op_mask"</span>: <span class="string">"read, write, delete"</span>,</div><div class="line">  <span class="string">"default_placement"</span>: <span class="string">""</span>,</div><div class="line">  <span class="string">"placement_tags"</span>: [],</div><div class="line">  <span class="string">"bucket_quota"</span>: &#123; <span class="string">"enabled"</span>: <span class="literal">false</span>,</div><div class="line">      <span class="string">"max_size_kb"</span>: -1,</div><div class="line">      <span class="string">"max_objects"</span>: -1&#125;,</div><div class="line">  <span class="string">"user_quota"</span>: &#123; <span class="string">"enabled"</span>: <span class="literal">false</span>,</div><div class="line">      <span class="string">"max_size_kb"</span>: -1,</div><div class="line">      <span class="string">"max_objects"</span>: -1&#125;,</div><div class="line">  <span class="string">"temp_url_keys"</span>: []&#125;</div></pre></td></tr></table></figure></p>
+<p>在测试swift的api时，使用的X-Auth-Token字段的值即为”swift-keys”字段中的”secret_key”。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ceph-radosgw-civetweb/" rel="tag">#ceph radosgw civetweb</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/15/使用ceph-deploy创建ceph集群/" rel="next" title="使用ceph-deploy创建ceph集群">
+                <i class="fa fa-chevron-left"></i> 使用ceph-deploy创建ceph集群
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/26/c-虚函数表解析/" rel="prev" title="c++虚函数表解析">
+                c++虚函数表解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ceph中使用civetweb运行radosgw"><span class="nav-number">1.</span> <span class="nav-text">ceph中使用civetweb运行radosgw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备"><span class="nav-number">2.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建RGW需要使用的存储池"><span class="nav-number">3.</span> <span class="nav-text">创建RGW需要使用的存储池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在ceph集群中创建user和keyring"><span class="nav-number">4.</span> <span class="nav-text">在ceph集群中创建user和keyring</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#radosgw节点配置"><span class="nav-number">5.</span> <span class="nav-text">radosgw节点配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行radosgw"><span class="nav-number">6.</span> <span class="nav-text">运行radosgw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用radosgw"><span class="nav-number">7.</span> <span class="nav-text">使用radosgw</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>
