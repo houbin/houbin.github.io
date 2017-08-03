@@ -1,0 +1,594 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="firewalld 端口转发," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="firewalld入门由于需要使用端口转发功能，选来选去还是使用centos 7的firewalld来作为端口映射工具。 下面对firewalld的使用详细说明一下。 本文参考链接http://www.jb51.net/article/112698.htm">
+<meta name="keywords" content="firewalld 端口转发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="firewalld入门">
+<meta property="og:url" content="http://yoursite.com/2017/08/03/firewalld入门/index.html">
+<meta property="og:site_name" content="ross&amp;linda&#39;s blog">
+<meta property="og:description" content="firewalld入门由于需要使用端口转发功能，选来选去还是使用centos 7的firewalld来作为端口映射工具。 下面对firewalld的使用详细说明一下。 本文参考链接http://www.jb51.net/article/112698.htm">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-08-03T02:39:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="firewalld入门">
+<meta name="twitter:description" content="firewalld入门由于需要使用端口转发功能，选来选去还是使用centos 7的firewalld来作为端口映射工具。 下面对firewalld的使用详细说明一下。 本文参考链接http://www.jb51.net/article/112698.htm">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/08/03/firewalld入门/"/>
+
+
+  <title> firewalld入门 | ross&linda's blog </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">ross&linda's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">notes</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                firewalld入门
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-08-03T10:33:03+08:00" content="2017-08-03">
+              2017-08-03
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="firewalld入门"><a href="#firewalld入门" class="headerlink" title="firewalld入门"></a>firewalld入门</h2><p>由于需要使用端口转发功能，选来选去还是使用centos 7的firewalld来作为端口映射工具。</p>
+<p>下面对firewalld的使用详细说明一下。</p>
+<p>本文参考链接<a href="http://www.jb51.net/article/112698.htm" target="_blank" rel="external">http://www.jb51.net/article/112698.htm</a></p>
+<a id="more"></a>
+<p>firewall-cmd需要firewalld进程处于运行状态。当我们修改一些配置之后，可以采用下面两种方式激活配置。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#</span><span class="bash"> systemctl restart firewalld</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --reload</span></div></pre></td></tr></table></figure></p>
+<p>第一种方式会中断现有的tcp会话，第二种方式不会中断正在连接的tcp会话。但是需要注意的是man firewall的页面中后面带有[P]应该是需要加上–permanent，以保证使用上述两个命令之后仍然有效。我就败在了下面命令下，导致端口转发一直不生效。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-masquerad  --permanent</span></div></pre></td></tr></table></figure></p>
+<h2 id="启动-停止"><a href="#启动-停止" class="headerlink" title="启动/停止"></a>启动/停止</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#</span><span class="bash"> systemctl list-unit-files | grep firewalld</span></div><div class="line"><span class="meta">#</span><span class="bash"> systemctl start firewalld</span></div><div class="line"><span class="meta">#</span><span class="bash"> systemctl <span class="built_in">enable</span> firewalld</span></div><div class="line"><span class="meta">#</span><span class="bash"> systemctl <span class="built_in">enable</span> firewalld</span></div></pre></td></tr></table></figure>
+<h2 id="防火墙功能"><a href="#防火墙功能" class="headerlink" title="防火墙功能"></a>防火墙功能</h2><p>firewalld的一个功能是防火墙功能，它可以屏蔽一些端口的使用，一般如果连接到互联网上，则只开启80端口提供访问，对内可以开启mysql、redis的端口。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-service=mysql --permanent          // 开放mysql端口</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --remove-service=http --permanent        // 阻止http服务端口</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --list-services --permanent              // 查看开发的服务</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-port=3306/tcp --permanent          // 开放通过tcp访问3306</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --remove-port=3306/tcp --permanent       // 阻止通过tcp访问3306</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --list-ports --permanent                 // 查看开发的端口</span></div></pre></td></tr></table></figure>
+<p>上述命令只是记录，没有做验证。</p>
+<h2 id="伪装ip"><a href="#伪装ip" class="headerlink" title="伪装ip"></a>伪装ip</h2><p>防火墙可以启动伪装ip的作用，端口转发功能会用到这个功能。个人理解是只有开启了伪装ip的功能，才可以起到端口转发的功能。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --query-masquerade --permanent</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-masquerade --permanent</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --remove-masquerade --permanent</span></div></pre></td></tr></table></figure>
+<p>相同的是，上述命令也需要通过 firewall-cmd –reload 命令来生效。</p>
+<h2 id="端口映射"><a href="#端口映射" class="headerlink" title="端口映射"></a>端口映射</h2><p>端口转发配置如下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-forward-port=port=80:proto=tcp:toport=8080 --permanent</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-forward-port=port=80:proto=tcp:toaddr=192.168.1.2 --permanent</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --add-forward-port=port=80:proto=tcp:toaddr=192.168.1.2:toport=8080 --permanent</span></div><div class="line"><span class="meta">#</span><span class="bash"> firewall-cmd --list-forward-ports</span></div></pre></td></tr></table></figure>
+<p>上述命令需要通过 firewall-cmd –reload 命令来生效。</p>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>上述配置完成之后，firewall对应的配置文件目录为<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">[root@inspur zones]# pwd</div><div class="line">/etc/firewalld/zones</div><div class="line">[root@inspur zones]# cat public.xml</div><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line">&lt;zone&gt;</div><div class="line">  &lt;short&gt;Public&lt;/short&gt;</div><div class="line">  &lt;description&gt;For use in public areas. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.&lt;/description&gt;</div><div class="line">  &lt;service name="dhcpv6-client"/&gt;</div><div class="line">  &lt;service name="ssh"/&gt;</div><div class="line">  &lt;port protocol="udp" port="22"/&gt;</div><div class="line">  &lt;port protocol="tcp" port="22"/&gt;</div><div class="line">  &lt;masquerade/&gt;</div><div class="line">  &lt;forward-port to-addr="100.7.44.66" to-port="22" protocol="tcp" port="16012"/&gt;</div><div class="line">&lt;/zone&gt;</div></pre></td></tr></table></figure></p>
+<p>End</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/firewalld-端口转发/" rel="tag">#firewalld 端口转发</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/23/Ceph与HDFS的UGO权限研究/" rel="next" title="Ceph与HDFS的UGO权限研究">
+                <i class="fa fa-chevron-left"></i> Ceph与HDFS的UGO权限研究
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/head.jpg"
+               alt="houbin" />
+          <p class="site-author-name" itemprop="name">houbin</p>
+          <p class="site-description motion-element" itemprop="description">stay foolish, stay hungry</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#firewalld入门"><span class="nav-number">1.</span> <span class="nav-text">firewalld入门</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动-停止"><span class="nav-number">2.</span> <span class="nav-text">启动/停止</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防火墙功能"><span class="nav-number">3.</span> <span class="nav-text">防火墙功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#伪装ip"><span class="nav-number">4.</span> <span class="nav-text">伪装ip</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#端口映射"><span class="nav-number">5.</span> <span class="nav-text">端口映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件"><span class="nav-number">6.</span> <span class="nav-text">配置文件</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">houbin</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>
