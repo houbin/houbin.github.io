@@ -242,6 +242,102 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/02/mysql安装和配置/" itemprop="url">
+                  mysql安装和配置
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-04-02T00:37:01+08:00" content="2016-04-02">
+              2016-04-02
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>由于众所周知的mysql已经被oracle收购了，考虑mysql的开发进度和闭源风险，centos 7已经将mysql替换成了同样源码的mariadb。<br>mariadb是mysql中不满oracle收购的核心开发者(包含创始人)出来在mysql源码基础上做的东西，使用方式与mysql完全一样，非常靠谱，这里就安装了mariadb。</p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/04/02/mysql安装和配置/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/03/26/c-虚函数表解析/" itemprop="url">
                   c++虚函数表解析
                 </a>
@@ -618,105 +714,6 @@
 
 
     
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/03/03/值语义/" itemprop="url">
-                  值语义
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-03-03T18:00:17+08:00" content="2016-03-03">
-              2016-03-03
-            </time>
-          </span>
-
-          
-
-          
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文参考陈硕大神编写的<a href="http://www.cnblogs.com/Solstice/archive/2011/08/16/2141515.html" target="_blank" rel="external">C++ 工程实践(8)：值语义</a>,只为了自己做个笔记。</p>
-<h2 id="什么是值语义"><a href="#什么是值语义" class="headerlink" title="什么是值语义"></a>什么是值语义</h2><p>值语义（value sematics）指的是对象的拷贝与原对象无关，即在内存中是两块不同的内存，各操作各的，如c++内置类型int、double，标准库的vector&lt;&gt;、map&lt;&gt;、string等类型，jave语言的primitive types也是值语义</p>
-<p>与值语义对应的就是对象语义（object sematics），也叫引用语义（reference sematics）。这里的引用与c++代码中引用不是一回事，下面使用对象语义来说明。<br>对象语义指的是面向对象意义下的对象，对象拷贝是禁止的。例如muduo中的Thread是对象语义，因为即使把Thread拷贝出来，也不能让系统增加一个一模一样的线程。<br>同样的道理，拷贝一个Employee对象也是没有意义的，一个雇员不能变成两个雇员。拷贝TcpConnection对象也是没有意义的，拷贝tcp连接不能使系统多出一个tcp连接。总之，面向对象语义下的对象是noncopyable的。</p>
-<p>Java中所有的class对象都是对象语义，所以下面代码a和b指向的是同一个ArrayList对象，修改a就会影响b，修改b也会影响a</p>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/03/03/值语义/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -762,7 +759,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-count">15</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
